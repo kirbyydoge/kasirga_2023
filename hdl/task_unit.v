@@ -36,6 +36,14 @@ reg [`PIXEL_BIT-1:0] aktif_gecmis_sutun_ns [0:2*`BLOCK_SIZE-1];
 reg [`PIXEL_BIT-1:0] buf_satir_r [0:`GB_FILTER_SIZE*`BLOCK_SIZE-1];
 reg [`PIXEL_BIT-1:0] buf_satir_ns [0:`GB_FILTER_SIZE*`BLOCK_SIZE-1];
 
+reg istek_kabul_r;
+reg istek_kabul_ns;
+
+localparam BEGIN_PAD_BUFFER  = `GB_FILTER_WEDGE - 1;
+localparam BEGIN_PAD_0       = `GB_FILTER_WEDGE;
+localparam END_PAD_SKIP      = `BLOCK_SIZE - `GB_FILTER_EDGE - 1 + `GB_FILTER_WEDGE;
+localparam END_PAD_0         = `BLOCK_SIZE - 1 + `GB_FILTER_WEDGE;
+
 localparam DURUM_BOSTA       = 0; // Test Gorevi
 localparam DURUM_GOREV0_INIT = 1; // Test Gorevi
 localparam DURUM_GOREV0_MUL0 = 2;
@@ -52,6 +60,18 @@ reg [`BLOCK_BIT:0] islem_row_ns;
 reg [`BLOCK_BIT:0] islem_col_r;
 reg [`BLOCK_BIT:0] islem_col_ns;
 
+reg [`BLOCK_BIT:0] islem_row_begin_r;
+reg [`BLOCK_BIT:0] islem_row_begin_ns;
+
+reg [`BLOCK_BIT:0] islem_col_begin_r;
+reg [`BLOCK_BIT:0] islem_col_begin_ns;
+
+reg [`BLOCK_BIT:0] islem_row_end_r;
+reg [`BLOCK_BIT:0] islem_row_end_ns;
+
+reg [`BLOCK_BIT:0] islem_col_end_r;
+reg [`BLOCK_BIT:0] islem_col_end_ns;
+
 reg [`BLOCK_AREA_BIT:0] ptr_yukle_r;
 reg [`BLOCK_AREA_BIT:0] ptr_yukle_ns;
 
@@ -67,8 +87,13 @@ reg [`PIXEL_BIT*`GB_FILTER_AREA-1:0] veri_agirlik_cmb;
 wire [`BLOCK_BIT-1:0] yukle_row_w;
 wire [`BLOCK_BIT-1:0] yukle_col_w;
 
-reg idct_hazir_cmb;
-reg islem_gecerli_cmb;
+reg [`PIXEL_BIT-1:0]        res_veri_cmb;
+reg [`IMG_HEIGHT_BIT-1:0]   res_row_cmb;
+reg [`IMG_WIDTH_BIT-1:0]    res_col_cmb;
+reg                         res_gecerli_cmb;
+
+reg         idct_hazir_cmb;
+reg         islem_gecerli_cmb;
 
 function [`BLOCK_BIT-1:0] get_row_block (
     input [`BLOCK_AREA_BIT-1:0] index
@@ -174,11 +199,16 @@ always @* begin
     durum_ns = durum_r;
     islem_row_ns = islem_row_r;
     islem_col_ns = islem_col_r;
+    islem_row_begin_ns = islem_row_begin_r;
+    islem_col_begin_ns = islem_col_begin_r;
+    islem_row_end_ns = islem_row_end_r;
+    islem_col_end_ns = islem_col_end_r;
     ptr_yukle_ns = ptr_yukle_r;
     ptr_blok_ns = ptr_blok_r;
+    istek_kabul_ns = istek_kabul_r;
     veri_pencere_cmb = 0;
     veri_agirlik_cmb = 0;
-    idct_hazir_cmb = ptr_yukle_r < 64;
+    idct_hazir_cmb = istek_kabul_r && ptr_yukle_r < 64;
     islem_gecerli_cmb = `LOW;
 
     for (i = 0; i < `GB_FILTER_SIZE - `GB_FILTER_EDGE; i = i + 1) begin
@@ -198,8 +228,11 @@ always @* begin
 
     for (i = 0; i < `GB_FILTER_SIZE; i = i + 1) begin
         for (j = 0; j < `GB_FILTER_SIZE; j = j + 1) begin
-            if (islem_row_r + i < `GB_FILTER_WEDGE + `GB_FILTER_EDGE) begin
-                veri_pencere_cmb[(i * `GB_FILTER_SIZE + j) * `PIXEL_BIT +: `PIXEL_BIT] = gecmis_satir_r[get_veri_satir_idx(ptr_blok_r, islem_row_r + i - `GB_FILTER_EDGE, islem_col_r + j)]; 
+            if ((islem_row_r + i > `BLOCK_SIZE + `GB_FILTER_WEDGE) || (islem_col_r + j > `BLOCK_SIZE + `GB_FILTER_WEDGE)) begin
+                veri_pencere_cmb[(i * `GB_FILTER_SIZE + j) * `PIXEL_BIT +: `PIXEL_BIT] = 0;
+            end
+            else if (islem_row_r + i < `GB_FILTER_WEDGE + `GB_FILTER_EDGE) begin
+                veri_pencere_cmb[(i * `GB_FILTER_SIZE + j) * `PIXEL_BIT +: `PIXEL_BIT] = gecmis_satir_r[get_veri_satir_idx(ptr_blok_r, islem_row_r + i - `GB_FILTER_EDGE, islem_col_r + j - `GB_FILTER_EDGE)];
             end
             else if (islem_col_r + j < `GB_FILTER_WEDGE + `GB_FILTER_EDGE) begin
                 veri_pencere_cmb[(i * `GB_FILTER_SIZE + j) * `PIXEL_BIT +: `PIXEL_BIT] = aktif_gecmis_sutun_r[get_veri_sutun_idx(islem_row_r + i - `GB_FILTER_WEDGE - `GB_FILTER_EDGE, islem_col_r + j - `GB_FILTER_EDGE)];
@@ -228,28 +261,38 @@ always @* begin
         aktif_filtre_ns[6] = -1;
         aktif_filtre_ns[7] = 0;
         aktif_filtre_ns[8] = 1;
-        islem_row_ns = 2;
-        islem_col_ns = 2;
+        islem_row_ns = BEGIN_PAD_0;
+        islem_col_ns = BEGIN_PAD_0;
+        islem_row_begin_ns = BEGIN_PAD_0;
+        islem_col_begin_ns = BEGIN_PAD_0;
+        islem_row_end_ns = END_PAD_SKIP;
+        islem_col_end_ns = END_PAD_SKIP;
         ptr_yukle_ns = 0;
         ptr_blok_ns = 0;
+        istek_kabul_ns = `HIGH;
         durum_ns = DURUM_GOREV0_MUL0;
     end
     DURUM_GOREV0_MUL0: begin
-        // require (`GB_FILTER_SIZE / 2) == 1. If not, add a +`GB_FILTER_SIZE / 2 term and include equality
-        if (ptr_yukle_r > ((islem_row_r - `GB_FILTER_WEDGE) * `BLOCK_SIZE + islem_col_r - `GB_FILTER_WEDGE) + `BLOCK_SIZE) begin
+        if (ptr_yukle_r > (islem_row_r - `GB_FILTER_EDGE) * `BLOCK_SIZE + islem_col_r - `GB_FILTER_EDGE
+        ||  (islem_row_r == islem_row_end_r - 1 && islem_col_r == islem_col_end_r)
+        ||  islem_row_r == islem_row_end_r) begin
             islem_gecerli_cmb = `HIGH;
-            if (islem_col_r + `GB_FILTER_EDGE < `BLOCK_SIZE + `GB_FILTER_WEDGE - 1) begin
+            if (islem_col_r < islem_col_end_r) begin
                 islem_col_ns = islem_col_r + 1;
             end
             else begin // jump to next row
-                islem_col_ns = 2;
+                islem_col_ns = islem_col_begin_r;
                 islem_row_ns = islem_row_r + 1;
             end
         end
 
-        if (islem_row_r + `GB_FILTER_EDGE == `BLOCK_SIZE + `GB_FILTER_WEDGE) begin
-            islem_col_ns = 1;
-            islem_row_ns = 2;  
+        if (islem_row_r == islem_row_end_r + 1) begin
+            islem_col_ns = BEGIN_PAD_BUFFER;
+            islem_row_ns = BEGIN_PAD_BUFFER;  
+            islem_row_begin_ns = BEGIN_PAD_BUFFER;
+            islem_col_begin_ns = BEGIN_PAD_BUFFER;
+            islem_row_end_ns = END_PAD_0;
+            islem_col_end_ns = END_PAD_0;
             ptr_blok_ns = ptr_blok_r + 1;
             ptr_yukle_ns = 0;
             for (i = 0; i < 2*`BLOCK_SIZE; i = i + 1) begin
@@ -259,6 +302,14 @@ always @* begin
         end
     end
     endcase
+
+    res_veri_cmb = 0;
+    for (i = 0; i < `GB_FILTER_AREA; i = i + 1) begin
+        res_veri_cmb = res_veri_cmb + veri_pencere_cmb[i * `PIXEL_BIT +: `PIXEL_BIT] * aktif_filtre_r[i];
+    end
+    res_gecerli_cmb = islem_gecerli_cmb;
+    res_row_cmb = (ptr_blok_r / `IMG_ROW_BLOCKS) * `BLOCK_SIZE + islem_row_r - `GB_FILTER_WEDGE;  
+    res_col_cmb = (ptr_blok_r % `IMG_ROW_BLOCKS) * `BLOCK_SIZE + islem_col_r - `GB_FILTER_WEDGE;  
 end
 
 always @(posedge clk_i) begin
@@ -281,8 +332,13 @@ always @(posedge clk_i) begin
         end
         islem_row_r <= 0;
         islem_col_r <= 0;
+        islem_row_begin_r <= 0;
+        islem_col_begin_r <= 0;
+        islem_row_end_r <= 0;
+        islem_col_end_r <= 0;
         ptr_yukle_r <= 0;
         ptr_blok_r <= 0;
+        istek_kabul_r <= 0;
     end
     else begin
         for (i = 0; i < `GB_FILTER_SIZE*`BLOCK_SIZE; i = i + 1) begin
@@ -303,13 +359,22 @@ always @(posedge clk_i) begin
         durum_r <= durum_ns;
         islem_row_r <= islem_row_ns;
         islem_col_r <= islem_col_ns;
+        islem_row_begin_r <= islem_row_begin_ns;
+        islem_col_begin_r <= islem_col_begin_ns;
+        islem_row_end_r <= islem_row_end_ns;
+        islem_col_end_r <= islem_col_end_ns;
         ptr_yukle_r <= ptr_yukle_ns;
         ptr_blok_r <= ptr_blok_ns;
+        istek_kabul_r <= istek_kabul_ns;
     end
 end
 
 assign idct_hazir_o = idct_hazir_cmb;
 assign yukle_row_w = get_row_block(ptr_yukle_r);
 assign yukle_col_w = get_col_block(ptr_yukle_r);
+assign res_veri_o = res_veri_cmb;
+assign res_row_o = res_row_cmb;
+assign res_col_o = res_col_cmb;
+assign res_gecerli_o = res_gecerli_cmb;
 
 endmodule
