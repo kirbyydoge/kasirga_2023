@@ -53,3 +53,19 @@
 `define GB_FILTER_BIT       $clog2(`GB_FILTER_SIZE)
 `define GB_FILTER_AREA      (`GB_FILTER_SIZE * `GB_FILTER_SIZE)
 `define GB_FILTER_AREA_BIT  $clog2(`GB_FILTER_AREA)
+
+// Gorevler
+`define GRV_BIT 3
+
+`define GRV1_G_SXY  0
+`define GRV2_G_L    1
+`define GRV3_M      2
+`define GRV4_H      3
+`define GRV5_HE     4
+`define GRV6_G2BW_E 5 
+
+// FILTRELER
+
+`define GAUSIAN_FLTR    72'd18591142952998863361
+`define SOBEL_X_FLTR    72'd18518522396055503103
+`define SOBEL_Y_FLTR    72'd18591140736778895103

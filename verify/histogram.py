@@ -30,7 +30,7 @@ for i in range(240):
 c = open("histogram.txt","w")
 for i in range(256):
     #print("{}\n".format(k[0]))
-    c.writelines("pixel: {} adet: {}\n".format(i,int(k[i])))
+    c.writelines("{}\n".format(int(k[i])))
 
     
 c.close()

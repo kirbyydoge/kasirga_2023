@@ -22,13 +22,36 @@ def convolution_filter(gray_img, kernel):
     return result
 
 
-im = Image.open("mario.jpg").convert('L')
+im = Image.open("lenna.png").convert('L')
 #im = im.resize((320, 240))
 p = np.pad(np.array(im), [(1, 1), (1, 1)], mode='constant')
-k = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]]
 
-filtered = convolution_filter(p, k)
-res = Image.fromarray(filtered)
+g = [[1/16, 2/16, 1/16], [2/16, 4/16, 2/16], [1/16, 2/16, 1/16]]
+x = [[1, 0, -1], [2, 0, -2], [1, 0, -1]]
+y = [[1, 2, 1], [0, 0, 0], [-1, -2, -1]]
+b = [[0, 0, 0], [0, 1, 0], [0, 0, 0]]
+
+filtered = convolution_filter(p, g)
+filtered = np.pad(np.array(filtered), [(1, 1), (1, 1)], mode='constant')
+for i in range(240):
+    for j in range(320):
+        if filtered[i][j]<0:
+            filtered[i][j]=0
+        elif filtered[i][j]>255:
+            filtered[i][j]=255
+        else:
+            filtered[i][j]=int(filtered[i][j])
+filtered = convolution_filter(filtered, x)
+filtered = np.pad(np.array(filtered), [(1, 1), (1, 1)], mode='constant')
+for i in range(240):
+    for j in range(320):
+        if filtered[i][j]<0:
+            filtered[i][j]=0
+        elif filtered[i][j]>255:
+            filtered[i][j]=255
+        else:
+            filtered[i][j]=int(filtered[i][j])
+filtered = convolution_filter(filtered, y)
 
 f = open("kiyas1.txt","w")
 
@@ -36,10 +59,13 @@ for i in range(240):
     for j in range(320):
         if filtered[i][j]<0:
             f.write("{}\n".format(0))
+            #filtered[i][j]=0
         elif filtered[i][j]>255:
             f.write("{}\n".format(255))
+            #filtered[i][j]=255
         else :
             f.write("{}\n".format(int(filtered[i][j])))
 f.close()
+res = Image.fromarray(filtered)
 print(filtered[1])
 res.show()

@@ -9,16 +9,18 @@ module evrisim_birimi (
     input        [71:0]         filtre_i,
     input                       veri_etkin_i,
     input        [7:0]          veri_i,
+    input                       gaus_i,
     output                      veri_etkin_o,
     output       [7:0]          veri_o
 
 );
-
+    reg gaus_r, gaus_ns;
+    
     reg veri_etkin_o_r;
     assign veri_etkin_o = veri_etkin_o_r;
 
     reg [31:0] mul_cmb;
-    reg [15:0] veri_o_r;
+    reg [7:0] veri_o_r;
     assign veri_o = veri_o_r;
 
     reg [16:0] sayac_320_r;
@@ -111,6 +113,7 @@ module evrisim_birimi (
         resim_r_ns[6] = resim_r[6];
         resim_r_ns[7] = resim_r[7];
         ilk_veri_ns = ilk_veri;
+        gaus_ns = gaus_r;
         for(i=0;i<9;i=i+1) begin
             filtre_r_ns[i] = filtre_r[i];
         end
@@ -118,6 +121,7 @@ module evrisim_birimi (
             for(i=9;i>0;i=i-1) begin
                 filtre_r_ns[9-i] = filtre_i[(i*8-1)-:8];
             end
+            gaus_ns = gaus_i;
         end
         if(veri_etkin_i) begin
             if(((sayac_320_r+1)%320)==0) begin
@@ -372,14 +376,14 @@ module evrisim_birimi (
 
         mul_cmb = 0;
         for (i = 0; i < 9; i = i + 1) begin
-            mul_cmb = $signed(mul_cmb) + $signed(filtre_r[i]) * $signed({1'b0, resim_r[i]});
+            mul_cmb = $signed(mul_cmb) + ($signed(filtre_r[i]) * $signed({1'b0, resim_r[i]}));
         end
 
-        veri_o_r = mul_cmb; 
+        veri_o_r = gaus_r ?  (mul_cmb >>>  4) : mul_cmb; 
         if ($signed(mul_cmb) < 0) begin
             veri_o_r = 0;
         end
-        else if (mul_cmb > 255) begin
+        else if ((gaus_r ? (mul_cmb >>> 4)  : mul_cmb) > 255) begin
             veri_o_r = 255;
         end
 
@@ -401,6 +405,7 @@ module evrisim_birimi (
             resim_r[7] <= 0;
             ilk_veri <= 0;
             veri_etkin_o_r <= 0;
+            gaus_r <= 0;
         end
         else begin
             sayac_320_r <= sayac_320_r_ns;
@@ -416,6 +421,7 @@ module evrisim_birimi (
             resim_r[6] <= resim_r_ns[6];
             resim_r[7] <= resim_r_ns[7];
             ilk_veri <= ilk_veri_ns;
+            gaus_r <= gaus_ns;
         end
     end    
 
