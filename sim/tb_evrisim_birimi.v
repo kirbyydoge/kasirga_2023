@@ -11,7 +11,8 @@ reg veri_etkin_i;
 reg [7:0] veri_i;
 wire veri_etkin_o;
 wire [7:0] veri_o;
-
+wire [7:0] laplacian_pixel_o;
+reg gaus_i;
 always begin
     clk_i = 1'b0;
     #5;
@@ -26,12 +27,14 @@ evrisim_birimi eb (
     .filtre_i(filtre_i),
     .veri_etkin_i(veri_etkin_i),
     .veri_i(veri_i),
+    .gaus_i(gaus_i),
+    .laplacian_pixel_o(laplacian_pixel_o),
     .veri_etkin_o(veri_etkin_o),
     .veri_o(veri_o)
 );
 
-localparam PATH_TO_IMG = "/home/ali/Desktop/TEKNOFEST/kasirga-goruntu-2023/verify/cevrilmis.txt";
-localparam PATH_TO_RES = "/home/ali/Desktop/TEKNOFEST/kasirga-goruntu-2023/verify/sonuc.txt";
+localparam PATH_TO_IMG = "D:/Teknofest_2023/kasirga-goruntu-2023/verify/cevrilmis.txt";
+localparam PATH_TO_RES = "D:/Teknofest_2023/kasirga-goruntu-2023/verify/sonuc.txt";
 reg [7:0] img_mem [0:320*240-1];
 reg [7:0] res_mem [0:320*240-1];
 
@@ -60,6 +63,7 @@ initial begin
     veri_i=0;
     @(posedge clk_i); #2;
     rstn_i = 1;
+    gaus_i=0;
     filtre_etkin_i=1;
     filtre_i={-8'd1,8'd0,8'd1,-8'd2,8'd0,8'd2,-8'd1,8'd0,8'd1};
     veri_etkin_i=1;

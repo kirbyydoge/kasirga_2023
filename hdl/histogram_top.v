@@ -67,7 +67,7 @@ reg he_etkin,he_etkin_ns;
 reg[16:0] he_cdf,he_cdf_ns;
 
 always@* begin
-    rd_adres_ns=rd_adres;
+    rd_adres_ns = rd_adres;
     valid_r_ns = valid_r;
     cdf_min_r_ns = cdf_min_r;
     he_cdf_ns = he_cdf;
@@ -107,7 +107,7 @@ always@* begin
                 he_cdf_ns = he_cdf + data_out_w;
             end
             if(rd_adres == 0) begin
-                he_etkin_ns = `HIGH;
+                he_etkin_ns = `LOW;
                 rd_adres_ns = rd_adres+1;
             end
         end

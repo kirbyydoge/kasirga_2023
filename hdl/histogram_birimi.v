@@ -78,6 +78,7 @@ always @* begin
     durum_ns = durum_r;
     wr_en_cmb = 0;
     addr_w_cmb = 0;
+
     data_in_cmb = 0;
     rd_en_cmb = 0;
     addr_r_cmb = 0;

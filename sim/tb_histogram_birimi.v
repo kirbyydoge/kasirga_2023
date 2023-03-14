@@ -17,8 +17,8 @@ module tb_histogram_birimi();
         .hazir_o (hazir_o)
     );
 
-    localparam PATH_TO_IMG = "/home/ali/Desktop/TEKNOFEST/kasirga-goruntu-2023/verify/cevrilmis.txt";
-    localparam cikti = "/home/ali/Desktop/TEKNOFEST/kasirga-goruntu-2023/verify/cikti.txt";
+    localparam PATH_TO_IMG = "D:/Teknofest_2023/kasirga-goruntu-2023/verify/cevrilmis.txt";
+    localparam cikti =       "D:/Teknofest_2023/kasirga-goruntu-2023/verify/sonuc.txt";
     
     
     reg [7:0] img_mem [0:320*240-1];
@@ -34,8 +34,8 @@ integer f;
 
 
     initial begin
-        f = $fopen(cikti,"w");
         $readmemh(PATH_TO_IMG, img_mem);
+         f = $fopen(cikti,"w");
         etkin_i = 0;
         rstn_i = 0;
         @(posedge clk_i); #2;
@@ -77,7 +77,6 @@ integer f;
         end
         
     $fclose(f);
-    #770000;
     $finish;
     end
 

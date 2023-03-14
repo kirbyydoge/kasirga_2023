@@ -5,7 +5,7 @@
 module medyan_birimi (
     input                       clk_i,
     input                       rstn_i,
-
+    input                       etkin_i,
     input [`PIXEL_BIT-1:0]      sayi_i,
     output [`PIXEL_BIT-1:0]     medyan_o,
     output                      hazir_o                      
@@ -60,7 +60,7 @@ always @* begin
         hazir_sayac_ns = 0;
         sayilar_ns = 0;
     end
-    else begin
+    if(etkin_i) begin
         hazir_sayac_ns = hazir_sayac_r + 1;
     end
 end

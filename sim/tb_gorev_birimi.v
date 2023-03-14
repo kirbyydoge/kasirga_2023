@@ -31,8 +31,8 @@ gorev_birimi ss (
     .pixel_o(pixel_o)
 );
 
-localparam PATH_TO_IMG = "/home/ali/Desktop/TEKNOFEST/kasirga-goruntu-2023/verify/cevrilmis.txt";
-localparam PATH_TO_RES = "/home/ali/Desktop/TEKNOFEST/kasirga-goruntu-2023/verify/sonuc.txt";
+localparam PATH_TO_IMG = "D:/Teknofest_2023/kasirga-goruntu-2023/verify/cevrilmis.txt";
+localparam PATH_TO_RES = "D:/Teknofest_2023/kasirga-goruntu-2023/verify/sonuc.txt";
 reg [7:0] img_mem [0:320*240-1];
 reg [7:0] res_mem [0:320*240-1];
 
@@ -62,7 +62,7 @@ initial begin
     @(posedge clk_i); #2;
     rstn_i = 1;
     basla=1;
-    gorev_i= `GRV1_G_SXY;
+    gorev_i= `GRV3_M;
     @(posedge clk_i); #2;
     basla=0;
     etkin_i=1;

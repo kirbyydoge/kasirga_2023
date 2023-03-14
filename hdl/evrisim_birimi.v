@@ -10,14 +10,26 @@ module evrisim_birimi (
     input                       veri_etkin_i,
     input        [7:0]          veri_i,
     input                       gaus_i,
+    input                       laplacian_i,
+    input                       gr2bw_erosion_i,
+    input        [7:0]          laplacian_pixel_i,
+    output       [71:0]         medyan_o,
+    output       [7:0]          laplacian_pixel_o,
     output                      veri_etkin_o,
     output       [7:0]          veri_o
 
 );
+
+    assign medyan_o ={resim_r[0],resim_r[1],resim_r[2],resim_r[3],resim_r[4],resim_r[5],resim_r[6],resim_r[7],resim_r[8]};
+
     reg gaus_r, gaus_ns;
+    reg laplacian_r, laplacian_ns;
+    reg gr2bw_erosion_r, gr2bw_erosion_ns;
     
     reg veri_etkin_o_r;
     assign veri_etkin_o = veri_etkin_o_r;
+
+    assign laplacian_pixel_o = resim_r[4];
 
     reg [31:0] mul_cmb;
     reg [7:0] veri_o_r;
@@ -33,6 +45,20 @@ module evrisim_birimi (
 
     reg[7:0] resim_r [8:0];
     reg[7:0] resim_r_ns [8:0];
+
+    wire[8:0] resim_BW_w;
+    assign resim_BW_w[0] = (resim_r[0] < 128) ? 0 : 1;
+    assign resim_BW_w[1] = (resim_r[1] < 128) ? 0 : 1;
+    assign resim_BW_w[2] = (resim_r[2] < 128) ? 0 : 1;
+    assign resim_BW_w[3] = (resim_r[3] < 128) ? 0 : 1;
+    assign resim_BW_w[4] = (resim_r[4] < 128) ? 0 : 1;
+    assign resim_BW_w[5] = (resim_r[5] < 128) ? 0 : 1;
+    assign resim_BW_w[6] = (resim_r[6] < 128) ? 0 : 1;
+    assign resim_BW_w[7] = (resim_r[7] < 128) ? 0 : 1;
+    assign resim_BW_w[8] = (resim_r[8] < 128) ? 0 : 1;
+    
+    wire sonuc_BW_w;
+    assign sonuc_BW_w = &resim_BW_w;
 
     reg rsm0[7:0];
     reg rsm1[7:0]; 
@@ -114,6 +140,8 @@ module evrisim_birimi (
         resim_r_ns[7] = resim_r[7];
         ilk_veri_ns = ilk_veri;
         gaus_ns = gaus_r;
+        laplacian_ns = laplacian_r;
+        gr2bw_erosion_ns = gr2bw_erosion_r;
         for(i=0;i<9;i=i+1) begin
             filtre_r_ns[i] = filtre_r[i];
         end
@@ -122,6 +150,8 @@ module evrisim_birimi (
                 filtre_r_ns[9-i] = filtre_i[(i*8-1)-:8];
             end
             gaus_ns = gaus_i;
+            laplacian_ns = laplacian_i;
+            gr2bw_erosion_ns = gr2bw_erosion_i;
         end
         if(veri_etkin_i) begin
             if(((sayac_320_r+1)%320)==0) begin
@@ -139,11 +169,6 @@ module evrisim_birimi (
             wr_en_i_cmb[(yaz_index +2) % 3] = 0;
         end
 
-        /*if(sayac_320_r==319 && sayac_240_r==0) begin
-            addr_i_cmb[yaz_index] = 0;
-            wr_en_i_cmb[yaz_index] = 0;
-            cmd_en_i_cmb[yaz_index] = 1;
-        end*/
 
         if(sayac_320_r==0 && sayac_240_r==0) begin
             ilk_veri_ns = veri_i;
@@ -162,12 +187,6 @@ module evrisim_birimi (
             resim_r_ns[4] = data_o_w[(yaz_index+2)%3];
             resim_r_ns[6] = resim_r[7];
             resim_r_ns[7] = veri_i;
-
-            
-
-            /*addr_i_cmb[yaz_index] = 0;
-            wr_en_i_cmb[yaz_index] = 0;
-            cmd_en_i_cmb[yaz_index] = 1;*/
 
             addr_i_cmb[(yaz_index+2)%3] = 0;
             wr_en_i_cmb[(yaz_index+2)%3] = 0;
@@ -188,10 +207,6 @@ module evrisim_birimi (
             resim_r_ns[7] = veri_i;
             
             
-
-            /*addr_i_cmb[yaz_index] = 0;
-            wr_en_i_cmb[yaz_index] = 0;
-            cmd_en_i_cmb[yaz_index] = 1;*/
 
             addr_i_cmb[(yaz_index+2)%3] = 0;
             wr_en_i_cmb[(yaz_index+2)%3] = 0;
@@ -375,16 +390,54 @@ module evrisim_birimi (
         end
 
         mul_cmb = 0;
-        for (i = 0; i < 9; i = i + 1) begin
-            mul_cmb = $signed(mul_cmb) + ($signed(filtre_r[i]) * $signed({1'b0, resim_r[i]}));
-        end
 
-        veri_o_r = gaus_r ?  (mul_cmb >>>  4) : mul_cmb; 
-        if ($signed(mul_cmb) < 0) begin
-            veri_o_r = 0;
-        end
-        else if ((gaus_r ? (mul_cmb >>> 4)  : mul_cmb) > 255) begin
-            veri_o_r = 255;
+        if(gaus_r) begin
+            
+            for (i = 0; i < 9; i = i + 1) begin
+                mul_cmb = $signed(mul_cmb) + ($signed(filtre_r[i]) * $signed({1'b0, resim_r[i]}));
+            end
+            
+            veri_o_r = mul_cmb >>>  4;
+            
+            if ($signed(mul_cmb) < 0) begin
+                veri_o_r = 0;
+            end
+            else if ((mul_cmb >>> 4)> 255) begin
+                veri_o_r = 255;
+            end
+        
+        end else if(laplacian_r) begin
+
+            for (i = 0; i < 9; i = i + 1) begin
+                mul_cmb = $signed(mul_cmb)  + ($signed(filtre_r[i]) * $signed({1'b0, resim_r[i]})) ;
+            end
+    
+            veri_o_r = mul_cmb +  $signed({24'd0, laplacian_pixel_i}); 
+
+            if ($signed(mul_cmb) < 0) begin
+                veri_o_r = 0;
+            end
+            else if ( mul_cmb  > 255) begin
+                veri_o_r = 255;
+            end 
+
+        end else if(gr2bw_erosion_r) begin
+            
+            veri_o_r = sonuc_BW_w ? 8'b11111111 : 8'b00000000;
+
+        end else begin
+
+            for (i = 0; i < 9; i = i + 1) begin
+                mul_cmb = $signed(mul_cmb) + ($signed(filtre_r[i]) * $signed({1'b0, resim_r[i]}));
+            end
+
+            veri_o_r = mul_cmb; 
+            if ($signed(mul_cmb) < 0) begin
+                veri_o_r = 0;
+            end
+            else if ( mul_cmb > 255) begin
+                veri_o_r = 255;
+            end
         end
 
     end
@@ -406,6 +459,8 @@ module evrisim_birimi (
             ilk_veri <= 0;
             veri_etkin_o_r <= 0;
             gaus_r <= 0;
+            laplacian_r <= 0;
+            gr2bw_erosion_r <= 0;
         end
         else begin
             sayac_320_r <= sayac_320_r_ns;
@@ -422,6 +477,8 @@ module evrisim_birimi (
             resim_r[7] <= resim_r_ns[7];
             ilk_veri <= ilk_veri_ns;
             gaus_r <= gaus_ns;
+            laplacian_r <= laplacian_ns;
+            gr2bw_erosion_r <= gr2bw_erosion_ns;
         end
     end    
 
