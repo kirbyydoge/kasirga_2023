@@ -62,7 +62,7 @@ initial begin
     @(posedge clk_i); #2;
     rstn_i = 1;
     basla=1;
-    gorev_i= `GRV3_M;
+    gorev_i= `GRV2_G_L;
     @(posedge clk_i); #2;
     basla=0;
     etkin_i=1;

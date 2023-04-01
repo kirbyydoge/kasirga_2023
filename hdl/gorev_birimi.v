@@ -129,6 +129,32 @@ always@* begin
         bellek_ns[i+1] = bellek[i];
     end
     bellek_ns[0] = laplacian_pixel_w0;
+    filtre_etkin_cmb0 = 0;
+    filtre_etkin_cmb1 = 0;
+    filtre_etkin_cmb2 = 0;
+    filtre_cmb0 = 0;
+    filtre_cmb1 = 0;
+    filtre_cmb2 = 0;
+    veri_etkin_cmb0 = 0;
+    veri_etkin_cmb1 = 0;
+    veri_etkin_cmb2 = 0;
+    veri_cmb0 = 0;
+    veri_cmb1 = 0;
+    veri_cmb2 = 0;
+    gaus_cmb0 = 0;
+    gaus_cmb1 = 0;
+    gaus_cmb2 = 0;
+    laplacian_cmb0 = 0;
+    laplacian_cmb1 = 0;
+    laplacian_cmb2 = 0;
+    gr2bw_erosion_cmb0 = 0;
+    gr2bw_erosion_cmb1 = 0;
+    gr2bw_erosion_cmb2 = 0;
+    laplacian_pixel_cmb1 = 0;
+    etkin_cmb = 0;
+    pixel_cmb = 0;
+    etkin_m_cmb = 0;
+    resim_m_cmb = 0;
 
     if(basla) begin
         case(gorev_i)
@@ -206,6 +232,18 @@ always@* begin
            
             etkin_cmb = veri_etkin_w2;
             pixel_cmb = veri_w2;
+
+            gaus_cmb0=1;
+            laplacian_cmb0=0;
+            gr2bw_erosion_cmb0=0;
+
+            gaus_cmb1=0;
+            laplacian_cmb1=0;
+            gr2bw_erosion_cmb1=0;
+
+            gaus_cmb2=0;
+            laplacian_cmb2=0;
+            gr2bw_erosion_cmb2=0;
            
             filtre_etkin_cmb0 = `LOW;
             filtre_etkin_cmb1 = `LOW;
@@ -223,6 +261,14 @@ always@* begin
             etkin_cmb = veri_etkin_w1;
             pixel_cmb = veri_w1;
 
+            gaus_cmb0=1;
+            laplacian_cmb0=0;
+            gr2bw_erosion_cmb0=0;
+
+            gaus_cmb1=0;
+            laplacian_cmb1=1;
+            gr2bw_erosion_cmb1=0;
+
             filtre_etkin_cmb0 = `LOW;
             filtre_etkin_cmb1 = `LOW;
         end
@@ -233,6 +279,10 @@ always@* begin
 
             etkin_cmb = veri_etkin_w0;
             pixel_cmb = veri_w0;
+
+            gaus_cmb0=0;
+            laplacian_cmb1=0;
+            gr2bw_erosion_cmb0=1;
 
             filtre_etkin_cmb0 = `LOW;
         end
@@ -245,6 +295,10 @@ always@* begin
 
             etkin_cmb = etkin_m_w;  
             pixel_cmb = pixel_m_w;
+
+            gaus_cmb0=0;
+            laplacian_cmb1=0;
+            gr2bw_erosion_cmb0=0;
 
             filtre_cmb0 = `LOW;  
         end

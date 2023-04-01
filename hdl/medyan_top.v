@@ -20,7 +20,7 @@ assign pixel_o = pixel_cmb;
 reg[63:0] resim_r[9:0];
 reg[63:0] resim_ns[9:0];
 
-reg[9:0] etkin_cmb;
+reg[9:0] etkin_cmb,etkin_cmb1;
 reg[`PIXEL_BIT-1:0] sayi_cmb [9:0];
 wire[`PIXEL_BIT-1:0] medyan_w[9:0];
 wire[9:0] hazir_w;
@@ -44,11 +44,14 @@ reg[4:0] giris_sayac_r,giris_sayac_ns;
 reg[4:0] cikis_sayac_r,cikis_sayac_ns;
 
 always@* begin
-    for(i=0;i<9;i=i+1) begin
+    for(i=0;i<10;i=i+1) begin
         resim_ns[i] = resim_r[i];
+        sayi_cmb[i]=0;
     end
     cikis_sayac_ns = cikis_sayac_r;
     giris_sayac_ns = giris_sayac_r;
+    pixel_cmb = 0;
+    etkin_cmb = etkin_cmb1;
 
     if(etkin_i) begin
         for(i=0;i<10;i=i+1) begin
@@ -89,12 +92,14 @@ always@(posedge clk_i) begin
         end
         giris_sayac_r <= 0;
         cikis_sayac_r <= 0;
+        etkin_cmb1 <= 0; 
     end else begin
         for(i=0;i<10;i=i+1) begin
             resim_r[i] <= resim_ns[i];
         end
         giris_sayac_r <= giris_sayac_ns;
         cikis_sayac_r <= cikis_sayac_ns;
+        etkin_cmb1 <= etkin_cmb;
     end
 end
 endmodule

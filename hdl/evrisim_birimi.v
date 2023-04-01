@@ -20,8 +20,6 @@ module evrisim_birimi (
 
 );
 
-    assign medyan_o ={resim_r[0],resim_r[1],resim_r[2],resim_r[3],resim_r[4],resim_r[5],resim_r[6],resim_r[7],resim_r[8]};
-
     reg gaus_r, gaus_ns;
     reg laplacian_r, laplacian_ns;
     reg gr2bw_erosion_r, gr2bw_erosion_ns;
@@ -45,6 +43,8 @@ module evrisim_birimi (
 
     reg[7:0] resim_r [8:0];
     reg[7:0] resim_r_ns [8:0];
+
+    assign medyan_o ={resim_r[0],resim_r[1],resim_r[2],resim_r[3],resim_r[4],resim_r[5],resim_r[6],resim_r[7],resim_r[8]};
 
     wire[8:0] resim_BW_w;
     assign resim_BW_w[0] = (resim_r[0] < 128) ? 0 : 1;
@@ -77,22 +77,67 @@ module evrisim_birimi (
     assign cmd_en_i_w[0] = cmd_en_i_cmb[0];
     assign wr_en_i_w[0] = wr_en_i_cmb[0];
     assign addr_i_w[0] = addr_i_cmb[0];
-    assign data_i_w [0]= data_i_cmb[0];
+    assign data_i_w [0] = data_i_cmb[0];
     assign cmd_en_i_w[1] = cmd_en_i_cmb[1];
     assign wr_en_i_w[1] = wr_en_i_cmb[1];
     assign addr_i_w[1] = addr_i_cmb[1];
-    assign data_i_w [1]= data_i_cmb[1];
+    assign data_i_w[1] = data_i_cmb[1];
     assign cmd_en_i_w[2] = cmd_en_i_cmb[2];
     assign wr_en_i_w[2] = wr_en_i_cmb[2];
     assign addr_i_w[2] = addr_i_cmb[2];
-    assign data_i_w [2]= data_i_cmb[2];
+    assign data_i_w [2] = data_i_cmb[2];
     
     reg[2:0] yaz_index;
     reg[2:0] yaz_index_ns;
     
     reg[7:0] ilk_veri, ilk_veri_ns;
 
+    wire wr_en_sram0;
+    assign wr_en_sram0 = cmd_en_i_w[0] & wr_en_i_w[0];
+    wire wr_en_sram1;
+    assign wr_en_sram1 = cmd_en_i_w[1] & wr_en_i_w[1];
+    wire wr_en_sram2;
+    assign wr_en_sram2 = cmd_en_i_w[2] & wr_en_i_w[2];
+    wire rd_en_sram0;
+    assign rd_en_sram0 = cmd_en_i_w[0] & (cmd_en_i_w[0] ^  wr_en_i_w[0]);
+    wire rd_en_sram1;
+    assign rd_en_sram1 = cmd_en_i_w[1] & (cmd_en_i_w[1] ^  wr_en_i_w[1]); 
+    wire rd_en_sram2;
+    assign rd_en_sram2 = cmd_en_i_w[2] & (cmd_en_i_w[2] ^  wr_en_i_w[2]);
 
+    sram_evrisim sram_0 (
+    .clk0 (clk_i),
+	.csb0 (!wr_en_sram0),
+	.addr0 (addr_i_w[0]),
+	.din0 (data_i_w[0]),
+	.clk1 (clk_i),
+	.csb1 (!rd_en_sram0),
+    .addr1 (addr_i_w[0]),
+    .dout1 (data_o_w[0])
+    );
+
+    sram_evrisim sram_1 (
+    .clk0 (clk_i),
+	.csb0 (!wr_en_sram1),
+	.addr0 (addr_i_w[1]),
+	.din0 (data_i_w[1]),
+	.clk1 (clk_i),
+	.csb1 (!rd_en_sram1),
+    .addr1 (addr_i_w[1]),
+    .dout1 (data_o_w[1])
+    );
+
+    sram_evrisim sram_2 (
+    .clk0 (clk_i),
+	.csb0 (!wr_en_sram2),
+	.addr0 (addr_i_w[2]),
+	.din0 (data_i_w[2]),
+	.clk1 (clk_i),
+	.csb1 (!rd_en_sram2),
+    .addr1 (addr_i_w[2]),
+    .dout1 (data_o_w[2])
+    );
+    /*
     bram_model 
     #(.DATA_WIDTH(8), .BRAM_DEPTH(320))
     bram_0 (
@@ -124,7 +169,7 @@ module evrisim_birimi (
         .wr_en_i    (wr_en_i_w[2]) ,
         .cmd_en_i   (cmd_en_i_w[2]),
         .data_o     (data_o_w[2])
-    );
+    );*/
 
     integer i;
     always @* begin
@@ -138,6 +183,22 @@ module evrisim_birimi (
         resim_r_ns[4] = resim_r[4];
         resim_r_ns[6] = resim_r[6];
         resim_r_ns[7] = resim_r[7];
+        resim_r[8] = 0;
+        resim_r[5] = 0;
+        resim_r[2] = 0;
+        cmd_en_i_cmb[0] = 0;
+        wr_en_i_cmb[0] = 0;
+        addr_i_cmb[0] = 0;
+        data_i_cmb[0] = 0;
+        cmd_en_i_cmb[1] = 0;
+        wr_en_i_cmb[1] = 0;
+        addr_i_cmb[1] = 0;
+        data_i_cmb[1] = 0;
+        cmd_en_i_cmb[2] = 0;
+        wr_en_i_cmb[2] = 0;
+        addr_i_cmb[2] = 0;
+        data_i_cmb[2] = 0;
+        veri_etkin_o_r = 0;
         ilk_veri_ns = ilk_veri;
         gaus_ns = gaus_r;
         laplacian_ns = laplacian_r;
@@ -176,6 +237,8 @@ module evrisim_birimi (
         end
 
         if(sayac_320_r==319 && sayac_240_r==1) begin
+
+            veri_etkin_o_r = 1;
             
             resim_r[2] = 0;
             resim_r[5] = data_o_w[(yaz_index+2)%3];
@@ -194,7 +257,9 @@ module evrisim_birimi (
         end
 
         if(sayac_320_r==319 && sayac_240_r>1 && sayac_240_r<239) begin
-            
+
+            veri_etkin_o_r = 1;
+
             resim_r[2]= data_o_w[(yaz_index+1)%3];
             resim_r[5]= data_o_w[(yaz_index+2)%3];
             resim_r[8]= veri_i;
@@ -216,6 +281,8 @@ module evrisim_birimi (
 
         if(sayac_320_r==319 && sayac_240_r==239) begin
 
+            veri_etkin_o_r = 1;
+
             resim_r[2]= data_o_w[(yaz_index+1)%3];
             resim_r[5]= data_o_w[(yaz_index+2)%3];
             resim_r[8]= veri_i;
@@ -234,6 +301,8 @@ module evrisim_birimi (
 
         if(sayac_320_r == 0 && sayac_240_r == 1) begin
             
+            veri_etkin_o_r = 0;
+
             resim_r[2]=0;
             resim_r[5]=0;
             resim_r[8]=0;
@@ -258,6 +327,8 @@ module evrisim_birimi (
 
         if(sayac_320_r == 0 && sayac_240_r > 1 && sayac_240_r <= 239) begin
             
+            veri_etkin_o_r = 1;
+
             resim_r[2]=0;
             resim_r[5]=0;
             resim_r[8]=0;
@@ -307,6 +378,8 @@ module evrisim_birimi (
 
         if(sayac_320_r > 0 && sayac_320_r < 319 && sayac_240_r > 1 && sayac_240_r <= 239) begin
             
+            veri_etkin_o_r = 1;
+
             resim_r[2]=data_o_w[(yaz_index+1)%3];
             resim_r[5]=data_o_w[(yaz_index+2)%3];
             resim_r[8]=veri_i;
@@ -332,6 +405,9 @@ module evrisim_birimi (
 
         if(sayac_240_r==240) begin
             if(sayac_320_r==0) begin
+
+                veri_etkin_o_r = 1;
+
                 resim_r[2]=0;
                 resim_r[5]=0;
                 resim_r[8]=0;
@@ -355,6 +431,9 @@ module evrisim_birimi (
                 sayac_320_r_ns=sayac_320_r+1;
             end
             if(sayac_320_r>0 && sayac_320_r<=319) begin
+
+                veri_etkin_o_r = 1;
+
                 resim_r[2]=data_o_w[(yaz_index+1)%3];
                 resim_r[5]=data_o_w[(yaz_index+2)%3];
                 resim_r[8]=0;
@@ -379,6 +458,9 @@ module evrisim_birimi (
             end
 
             if(sayac_320_r==320) begin
+
+                veri_etkin_o_r = 1;
+
                 resim_r[2]=0;
                 resim_r[5]=0;
                 resim_r[8]=0;
@@ -457,7 +539,6 @@ module evrisim_birimi (
             resim_r[6] <= 0;
             resim_r[7] <= 0;
             ilk_veri <= 0;
-            veri_etkin_o_r <= 0;
             gaus_r <= 0;
             laplacian_r <= 0;
             gr2bw_erosion_r <= 0;

@@ -1,4 +1,6 @@
 `timescale 1ns/1ps
+ 
+`include "sabitler.vh"
 
 module dequantizer (
     input                       clk_i,
@@ -10,19 +12,19 @@ module dequantizer (
     input                       zig_veri_gecerli_i,
     output                      zig_veri_hazir_o,
 
-    output                      idct_veri_o,
+    output  [`Q_BIT-1:0]        idct_veri_o,
     output  [`BLOCK_BIT-1:0]    idct_veri_row_o,
     output  [`BLOCK_BIT-1:0]    idct_veri_col_o,
     output                      idct_veri_gecerli_o,
-    input                       idct_veri_hazir_i,
+    input                       idct_veri_hazir_i
 );
 
 reg [`DQ_TABLO_BIT-1:0]  rom_nicem_tablosu_r [0:`BLOCK_AREA-1];
 
 reg                      veri_hazir_cmb;
 
-reg                      veri_r;
-reg                      veri_ns;
+reg  [`Q_BIT-1:0]        veri_r;
+reg  [`Q_BIT-1:0]        veri_ns;
 
 reg  [`BLOCK_BIT-1:0]    veri_row_r;
 reg  [`BLOCK_BIT-1:0]    veri_row_ns;
@@ -115,7 +117,8 @@ always @* begin
     end
 
     if (zig_veri_gecerli_i && zig_veri_hazir_o) begin
-        veri_ns = zig_veri_i * rom_nicem_tablosu_r[zig_veri_row_i << 3 + zig_veri_col_i];
+        veri_ns = {`Q_BIT{1'b0}};
+        veri_ns[`Q_INT] = zig_veri_i * rom_nicem_tablosu_r[zig_veri_row_i << 3 + zig_veri_col_i];
         veri_row_ns = zig_veri_row_i;
         veri_col_ns = zig_veri_col_i;
         veri_gecerli_ns = `HIGH;
