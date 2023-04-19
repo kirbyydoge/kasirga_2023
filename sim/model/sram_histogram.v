@@ -46,8 +46,8 @@ module sram_histogram(
     csb0_reg = csb0;
     addr0_reg = addr0;
     din0_reg = din0;
-    if ( !csb0_reg && VERBOSE )
-      $display($time," Writing %m addr0=%b din0=%b",addr0_reg,din0_reg);
+    /*if ( !csb0_reg && VERBOSE )
+      $display($time," Writing %m addr0=%b din0=%b",addr0_reg,din0_reg);*/
   end
 
   reg  csb1_reg;
@@ -60,10 +60,10 @@ module sram_histogram(
     csb1_reg = csb1;
     addr1_reg = addr1;
     if (!csb0 && !csb1 && (addr0 == addr1))
-         $display($time," WARNING: Writing and reading addr0=%b and addr1=%b simultaneously!",addr0,addr1);
+         $display($time," WARNING: Histogram Writing and reading addr0=%b and addr1=%b simultaneously!",addr0,addr1);
     #(T_HOLD) dout1 = 17'bx;
-    if ( !csb1_reg && VERBOSE ) 
-      $display($time," Reading %m addr1=%b dout1=%b",addr1_reg,mem[addr1_reg]);
+    /*if ( !csb1_reg && VERBOSE ) 
+      $display($time," Reading %m addr1=%b dout1=%b",addr1_reg,mem[addr1_reg]);*/
   end
 
 

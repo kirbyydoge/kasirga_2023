@@ -1,6 +1,6 @@
 // OpenRAM SRAM model
 // Words: 320
-// Word size: 8
+// Word size: 11
 
 module sram_evrisim(
 `ifdef USE_POWER_PINS
@@ -13,7 +13,7 @@ module sram_evrisim(
     clk1,csb1,addr1,dout1
   );
 
-  parameter DATA_WIDTH = 8 ;
+  parameter DATA_WIDTH = 11 ;
   parameter ADDR_WIDTH = 9 ;
   parameter RAM_DEPTH = 1 << ADDR_WIDTH;
   // FIXME: This delay is arbitrary.
@@ -46,8 +46,8 @@ module sram_evrisim(
     csb0_reg = csb0;
     addr0_reg = addr0;
     din0_reg = din0;
-    if ( !csb0_reg && VERBOSE )
-      $display($time," Writing %m addr0=%b din0=%b",addr0_reg,din0_reg);
+    /*if ( !csb0_reg && VERBOSE )
+      $display($time," Writing %m addr0=%b din0=%b",addr0_reg,din0_reg);*/
   end
 
   reg  csb1_reg;
@@ -60,10 +60,10 @@ module sram_evrisim(
     csb1_reg = csb1;
     addr1_reg = addr1;
     if (!csb0 && !csb1 && (addr0 == addr1))
-         $display($time," WARNING: Writing and reading addr0=%b and addr1=%b simultaneously!",addr0,addr1);
+         $display($time," WARNING: Evrisim Writing and reading addr0=%b and addr1=%b simultaneously!",addr0,addr1);
     #(T_HOLD) dout1 = 17'bx;
-    if ( !csb1_reg && VERBOSE ) 
-      $display($time," Reading %m addr1=%b dout1=%b",addr1_reg,mem[addr1_reg]);
+    /*if ( !csb1_reg && VERBOSE ) 
+      $display($time," Reading %m addr1=%b dout1=%b",addr1_reg,mem[addr1_reg]);*/
   end
 
 
@@ -72,7 +72,7 @@ module sram_evrisim(
   always @ (negedge clk0)
   begin : MEM_WRITE0
     if (!csb0_reg) begin
-        mem[addr0_reg][7:0] = din0_reg[7:0];
+        mem[addr0_reg][10:0] = din0_reg[10:0];
     end
   end
 

@@ -1,5 +1,5 @@
-a = open("kiyas1.txt","r")
-b = open("kiyas2.txt","r")
+a = open("sonuc_decimal.txt","r")
+b = open("histogram_esitleme.txt","r")
 
 for i in range(320*240):
     k=a.readline()

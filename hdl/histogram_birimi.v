@@ -74,11 +74,13 @@ assign rd_en_o = !rd_en_cmb;
 assign addr_r_o = addr_r_cmb;
 assign data_out_w = data_out_i;
 
+reg isaret, isaret_ns;
+
 always @* begin
     durum_ns = durum_r;
     wr_en_cmb = 0;
     addr_w_cmb = 0;
-
+    isaret_ns = isaret;
     data_in_cmb = 0;
     rd_en_cmb = 0;
     addr_r_cmb = 0;
@@ -95,9 +97,11 @@ always @* begin
     cdf_min_sayac_ns = cdf_min_sayac;
 
     hazir_cmb = pixel_sayac_r == 76803 ? 1 : 0;
-    pixel_sayac_ns = pixel_sayac_r == 76803 ? 0 : pixel_sayac_r + 1;
+    pixel_sayac_ns = pixel_sayac_r;
 
     if (etkin_i) begin
+        isaret_ns = 1;
+        pixel_sayac_ns = pixel_sayac_r == 76803 ? 0 : pixel_sayac_r + 1;
         if(pixel_i < cdf_min_pixel) begin
             cdf_min_pixel_ns = pixel_i;
             cdf_min_sayac_ns = 1;
@@ -185,30 +189,36 @@ always @* begin
             endcase
         end
     end
-    else begin
+    if(isaret & !etkin_i) begin
         case (durum_r) 
             X: begin
-                durum_ns = BIR;
+                //durum_ns = BIR;
                 flag_ns = 0;
+                pixel_sayac_ns = 0;
+                isaret_ns =0;
             end
             BIR: begin
                 wr_en_cmb = `HIGH;
                 addr_w_cmb = cache_line1_r;
                 data_in_cmb = cache_line1_counter_r;  
                 durum_ns = IKI;
-                flag_ns = 0; 
+                flag_ns = 0;
+                pixel_sayac_ns = pixel_sayac_r + 1; 
             end
             IKI: begin
                 wr_en_cmb = `HIGH;
                 addr_w_cmb = cache_line2_r;
                 data_in_cmb = cache_line2_counter_r; 
                 durum_ns = UC; 
+                pixel_sayac_ns = pixel_sayac_r + 1;
             end
             UC: begin
                 wr_en_cmb = `HIGH;
                 addr_w_cmb = cache_line3_r;
                 data_in_cmb = cache_line3_counter_r; 
-                durum_ns = BIR; 
+                //durum_ns = BIR;
+                durum_ns = X;
+                pixel_sayac_ns = pixel_sayac_r + 1; 
             end
         endcase
 
@@ -231,6 +241,7 @@ always @(posedge clk_i) begin
         cdf_min_pixel <= 255;
         cdf_min_sayac <= 0;
         durum_r <= BIR;
+        isaret <= 0;
     end 
 
     else begin
@@ -247,6 +258,7 @@ always @(posedge clk_i) begin
         durum_r <= durum_ns;
         cdf_min_pixel <= cdf_min_pixel_ns;
         cdf_min_sayac <= cdf_min_sayac_ns;
+        isaret <= isaret_ns;
     end
 end
 

@@ -22,16 +22,15 @@ assign pixel_o = pixel_cmb;
 reg filtre_etkin_cmb0;
 reg [71:0] filtre_cmb0;
 reg veri_etkin_cmb0;
-reg [10:0] veri_cmb0;
+reg [`PIXEL_BIT-1:0] veri_cmb0;
 wire veri_etkin_w0;
-wire [10:0] veri_w0;
+wire [`PIXEL_BIT-1:0] veri_w0;
 reg gaus_cmb0;
 reg laplacian_cmb0;
-reg[10:0] laplacian_pixel_cmb0;
-wire[10:0] laplacian_pixel_w0;
+reg[`PIXEL_BIT-1:0] laplacian_pixel_cmb0;
+wire[7:0] laplacian_pixel_w0;
 reg gr2bw_erosion_cmb0;
 wire[71:0] medyan_w0;
-reg tasma_cmb0;
 
 evrisim_birimi eb0 (
     .clk_i(clk_i),
@@ -45,7 +44,6 @@ evrisim_birimi eb0 (
     .laplacian_pixel_i(laplacian_pixel_cmb0),
     .laplacian_pixel_o(laplacian_pixel_w0),
     .gr2bw_erosion_i(gr2bw_erosion_cmb0),
-    .tasma_i(tasma_cmb0),
     .medyan_o(medyan_w0),
     .veri_etkin_o(veri_etkin_w0),
     .veri_o(veri_w0)
@@ -54,15 +52,14 @@ evrisim_birimi eb0 (
 reg filtre_etkin_cmb1;
 reg [71:0 ]filtre_cmb1;
 reg veri_etkin_cmb1;
-reg [10:0] veri_cmb1;
+reg [`PIXEL_BIT-1:0] veri_cmb1;
 wire veri_etkin_w1;
-wire [10:0] veri_w1;
+wire [`PIXEL_BIT-1:0] veri_w1;
 reg gaus_cmb1;
 reg laplacian_cmb1;
-reg[10:0] laplacian_pixel_cmb1;
-wire[10:0] laplacian_pixel_w1;
+reg[`PIXEL_BIT-1:0] laplacian_pixel_cmb1;
+wire[7:0] laplacian_pixel_w1;
 reg gr2bw_erosion_cmb1;
-reg tasma_cmb1;
 
 evrisim_birimi eb1 (
     .clk_i(clk_i),
@@ -76,7 +73,6 @@ evrisim_birimi eb1 (
     .laplacian_pixel_i(laplacian_pixel_cmb1),
     .laplacian_pixel_o(laplacian_pixel_w1),
     .gr2bw_erosion_i(gr2bw_erosion_cmb1),
-    .tasma_i(tasma_cmb1),
     .veri_etkin_o(veri_etkin_w1),
     .veri_o(veri_w1)
 );
@@ -84,15 +80,14 @@ evrisim_birimi eb1 (
 reg filtre_etkin_cmb2;
 reg [71:0 ]filtre_cmb2;
 reg veri_etkin_cmb2;
-reg [10:0] veri_cmb2;
+reg [`PIXEL_BIT-1:0] veri_cmb2;
 wire veri_etkin_w2;
-wire [10:0] veri_w2;
+wire [`PIXEL_BIT-1:0] veri_w2;
 reg gaus_cmb2;
 reg laplacian_cmb2;
-reg[10:0] laplacian_pixel_cmb2;
-wire[10:0] laplacian_pixel_w2;
+reg[`PIXEL_BIT-1:0] laplacian_pixel_cmb2;
+wire[7:0] laplacian_pixel_w2;
 reg gr2bw_erosion_cmb2;
-reg tasma_cmb2;
 
 evrisim_birimi eb2 (
     .clk_i(clk_i),
@@ -106,7 +101,6 @@ evrisim_birimi eb2 (
     .laplacian_pixel_i(laplacian_pixel_cmb2),
     .laplacian_pixel_o(laplacian_pixel_w2),
     .gr2bw_erosion_i(gr2bw_erosion_cmb2),
-    .tasma_i(tasma_cmb2),
     .veri_etkin_o(veri_etkin_w2),
     .veri_o(veri_w2)
 );
@@ -114,7 +108,7 @@ evrisim_birimi eb2 (
 reg etkin_m_cmb;
 reg [71:0] resim_m_cmb;
 wire etkin_m_w;
-wire [7:0] pixel_m_w;
+wire [`PIXEL_BIT-1:0] pixel_m_w;
 
 medyan_top mdyn (
     .clk_i(clk_i),
@@ -206,10 +200,10 @@ always@* begin
     etkin_h_cmb = 0;
     pixel_h_cmb = 0;
     data_out_h_cmb = 0;
-    wr_en_s_cmb = 1;
+    wr_en_s_cmb = 0;
     addr_w_s_cmb = 0;
     data_in_s_cmb = 0;
-    rd_en_s_cmb = 1;
+    rd_en_s_cmb = 0;
     addr_r_s_cmb = 0;
 
     if(basla) begin
@@ -221,22 +215,18 @@ always@* begin
                 gaus_cmb0=1;
                 laplacian_cmb0=0;
                 gr2bw_erosion_cmb0=0;
-                tasma_cmb0=0;
                 
-                filtre_cmb1 = `SOBEL_X_FLTR;
+                filtre_cmb1 = `NON_FLTR;
                 filtre_etkin_cmb1 = `HIGH;
                 gaus_cmb1=0;
                 laplacian_cmb1=0;
                 gr2bw_erosion_cmb1=0;
-                tasma_cmb1=0;
 
-
-                filtre_cmb2 = `SOBEL_Y_FLTR;;
+                filtre_cmb2 = `NON_FLTR;
                 filtre_etkin_cmb2 = `HIGH;
                 gaus_cmb2=0;
                 laplacian_cmb2=0;
                 gr2bw_erosion_cmb2=0;
-                tasma_cmb2=1;
 
                 durum_ns = `GRV1_G_SXY+1;
             end
@@ -247,21 +237,18 @@ always@* begin
                 gaus_cmb0=1;
                 laplacian_cmb0=0;
                 gr2bw_erosion_cmb0=0;
-                tasma_cmb0=0;
 
                 filtre_cmb1 = `LAPLACIAN_FLTR;
                 filtre_etkin_cmb1 = `HIGH;
                 gaus_cmb1=0;
                 laplacian_cmb1=1;
                 gr2bw_erosion_cmb1=0;
-                tasma_cmb1=0;
 
                 filtre_cmb2 = `NON_FLTR;
                 filtre_etkin_cmb2 = `HIGH;
                 gaus_cmb2=0;
                 laplacian_cmb2=0;
                 gr2bw_erosion_cmb2=0;
-                tasma_cmb2=0;
 
                 durum_ns = `GRV2_G_L+1;
             end
@@ -280,9 +267,8 @@ always@* begin
                 filtre_cmb0 = `NON_FLTR;
                 filtre_etkin_cmb0= `HIGH;
                 gaus_cmb0=0;
-                laplacian_cmb0=0;
+                laplacian_cmb1=0;
                 gr2bw_erosion_cmb0=0;
-                tasma_cmb0=0;
 
                 durum_ns = `GRV3_M+1;
             end
@@ -397,9 +383,8 @@ always@* begin
             pixel_cmb = pixel_m_w;
 
             gaus_cmb0=0;
-            laplacian_cmb0=0;
+            laplacian_cmb1=0;
             gr2bw_erosion_cmb0=0;
-            tasma_cmb0=0;
 
             filtre_cmb0 = `LOW;  
         end

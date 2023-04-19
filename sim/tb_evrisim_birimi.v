@@ -65,7 +65,7 @@ initial begin
     rstn_i = 1;
     gaus_i=0;
     filtre_etkin_i=1;
-    filtre_i={-8'd1,8'd0,8'd1,-8'd2,8'd0,8'd2,-8'd1,8'd0,8'd1};
+    filtre_i={8'd0,8'd0,8'd0,8'd0,8'd1,8'd0,8'd0,8'd0,8'd0};
     veri_etkin_i=1;
     for(i=0;i<240;i=i+1) begin
         for(j=0;j<320;j=j+1) begin

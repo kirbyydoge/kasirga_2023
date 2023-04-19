@@ -53,17 +53,18 @@ always@* begin
     pixel_cmb = 0;
     etkin_cmb = etkin_cmb1;
 
-    if(etkin_i) begin
-        for(i=0;i<10;i=i+1) begin
-            if(i==giris_sayac_r) begin
-                resim_ns[giris_sayac_r] = resim_i[71:8];
-                etkin_cmb[giris_sayac_r] = `HIGH;
-                sayi_cmb[giris_sayac_r] = resim_i[7:0];
-            end else begin
-                resim_ns[i] = resim_r[i] >> 8;
-                sayi_cmb[i] = resim_r[i][7:0];
-            end
+    for(i=0;i<10;i=i+1) begin
+        if(i==giris_sayac_r) begin
+            resim_ns[giris_sayac_r] = resim_i[71:8];
+            etkin_cmb[giris_sayac_r] = etkin_i;
+            sayi_cmb[giris_sayac_r] = resim_i[7:0];
+        end else begin
+            resim_ns[i] = resim_r[i] >> 8;
+            sayi_cmb[i] = resim_r[i][7:0];
         end
+    end
+
+    if(etkin_i) begin
         if(giris_sayac_r==9) begin
             giris_sayac_ns =0;
         end else begin

@@ -2,7 +2,7 @@
 
 `include "sabitler.vh"
 
-module tb_histogram_birimi();
+module tb_histogram_esitleme();
     reg                       clk_i;
     reg                       rstn_i;
     reg                       etkin_i;
