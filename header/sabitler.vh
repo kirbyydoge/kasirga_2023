@@ -7,6 +7,9 @@
 `define HIGH                1'b1
 `define LOW                 1'b0
 
+`define AC_IN_BIT           8
+`define DC_IN_BIT           8
+
 `define WB_BIT              32
 `define WB_BYTE             (`WB_BIT / 8)
 

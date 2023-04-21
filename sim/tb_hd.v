@@ -21,6 +21,9 @@ reg                       rstn_i;
 reg     [`WB_BIT-1:0]     m_veri_i;
 reg                       m_gecerli_i;
 wire                      m_hazir_o;
+wire    [10:0]            dc_data_o;
+wire                      dc_valid_o;
+reg                       dc_ready_i;
 wire    [`RUN_BIT-1:0]    nd_run_o;
 wire    [`CAT_BIT-1:0]    nd_cat_o;
 wire                      nd_gecerli_o;
@@ -32,6 +35,9 @@ huffman_decoder uut (
     .m_veri_i      ( m_veri_i ),
     .m_gecerli_i   ( m_gecerli_i ),
     .m_hazir_o     ( m_hazir_o ),
+    .dc_data_o     ( dc_data_o ),
+    .dc_valid_o    ( dc_valid_o ),
+    .dc_ready_i    ( dc_ready_i ),
     .nd_run_o      ( nd_run_o ),
     .nd_cat_o      ( nd_cat_o ),
     .nd_gecerli_o  ( nd_gecerli_o ),
@@ -50,7 +56,9 @@ reg [TEST_LEN-1:0] test_deger;
 
 integer i;
 initial begin
-    test_deger = {TEST_AC_0_0, TEST_AC_0_2, TEST_AC_0_1, TEST_AC_0_9, TEST_AC_0_5, TEST_AC_0_3};
+    dc_ready_i = 1;
+    // test_deger = {TEST_AC_0_0, TEST_AC_0_2, TEST_AC_0_1, TEST_AC_0_9, TEST_AC_0_5, TEST_AC_0_3};
+    test_deger = {8'b10101110};
     rstn_i = 1'b0;
     m_veri_i = test_deger;
     m_gecerli_i = 0;

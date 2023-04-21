@@ -8,9 +8,13 @@ module huffman_decoder (
     input                   rstn_i,
 
     // Caravel Master <> Huffman Decoder
-    input  [`WB_BIT-1:0]    m_veri_i,
+    input  [`AC_IN_BIT-1:0] m_veri_i,
     input                   m_gecerli_i,
     output                  m_hazir_o,
+
+    output [10:0]           dc_data_o,
+    output                  dc_valid_o,
+    input                   dc_ready_i,
 
     // Huffman Decoder <> Nicemleme Donusturucu
     output [`RUN_BIT-1:0]   nd_run_o,
@@ -23,8 +27,11 @@ localparam HD_BUF_PTR_BIT = $clog2(`HD_BUF_BIT);
 localparam HD_COZ_PTR_BIT = $clog2(`HD_AC_TABLO_BIT + 1);
 
 localparam DURUM_BOSTA       = 'd0;
-localparam DURUM_AC_COZ      = 'd1;
-localparam DURUM_COZ_KONTROL = 'd2;
+localparam DURUM_DC_COZ      = 'd1;
+localparam DURUM_DC_OKU      = 'd2;
+localparam DURUM_DC_GONDER   = 'd3;
+localparam DURUM_AC_COZ      = 'd4;
+localparam DURUM_COZ_KONTROL = 'd5;
 
 reg [`HD_BUF_BIT-1:0]       buf_girdi_r;
 reg [`HD_BUF_BIT-1:0]       buf_girdi_ns;
@@ -70,6 +77,29 @@ reg [`HD_AC_TABLO_BIT-1:0]  rom_ac_run_r [0:`HD_AC_TABLO_ROW-1];
 reg [`HD_AC_TABLO_BIT-1:0]  rom_ac_cat_r [0:`HD_AC_TABLO_ROW-1];
 reg [`HD_AC_TABLO_BIT-1:0]  rom_ac_gecerli_r [0:`HD_AC_TABLO_ROW-1];
 
+reg [10:0] dc_diff_cmb;
+
+reg [8:0] rom_dc_bit_r [0:11];
+reg [8:0] rom_dc_gecerli_r [0:11];
+
+reg [3:0] dc_ptr_r;
+reg [3:0] dc_ptr_ns;
+
+reg [10:0] last_dc_blk_r;
+reg [10:0] last_dc_blk_ns;
+
+reg [10:0] dc_data_cmb;
+reg dc_valid_cmb;
+
+reg [11:0] dc_degerlendir_r;
+reg [11:0] dc_degerlendir_ns;
+
+reg [3:0] dc_oku_boyut_r;
+reg [3:0] dc_oku_boyut_ns;
+
+reg dc_one_hot_cmb;
+reg [3:0] dc_one_hot_idx;
+
 reg [`HD_COZ_ADIM-1:0]      ac_huffman_adim_bit_cmb [0:`HD_AC_TABLO_ROW-1];
 reg [`HD_COZ_ADIM-1:0]      ac_huffman_adim_gecerli_cmb [0:`HD_AC_TABLO_ROW-1];
 reg [`HD_COZ_ADIM-1:0]      buf_adim_veri_cmb;
@@ -78,6 +108,46 @@ reg [HD_COZ_PTR_BIT-1:0]    gecmis_gecerli_bit_cmb;
 
 reg [HD_COZ_PTR_BIT-1:0]    ptr_coz_r;
 reg [HD_COZ_PTR_BIT-1:0]    ptr_coz_ns;
+
+task rom_dc_init();
+begin
+    rom_dc_bit_r[0]      <= 9'b000000000;
+    rom_dc_gecerli_r[0]  <= 9'b110000000;
+
+    rom_dc_bit_r[1]      <= 9'b010000000;
+    rom_dc_gecerli_r[1]  <= 9'b111000000;
+
+    rom_dc_bit_r[2]      <= 9'b011000000;
+    rom_dc_gecerli_r[2]  <= 9'b111000000;
+
+    rom_dc_bit_r[3]      <= 9'b100000000;
+    rom_dc_gecerli_r[3]  <= 9'b111000000;
+
+    rom_dc_bit_r[4]      <= 9'b101000000;
+    rom_dc_gecerli_r[4]  <= 9'b111000000;
+    
+    rom_dc_bit_r[5]      <= 9'b110000000;
+    rom_dc_gecerli_r[5]  <= 9'b111000000;
+
+    rom_dc_bit_r[6]      <= 9'b111000000;
+    rom_dc_gecerli_r[6]  <= 9'b111100000;
+    
+    rom_dc_bit_r[7]      <= 9'b111100000;
+    rom_dc_gecerli_r[7]  <= 9'b111110000;
+
+    rom_dc_bit_r[8]      <= 9'b111110000;
+    rom_dc_gecerli_r[8]  <= 9'b111111000;
+    
+    rom_dc_bit_r[9]      <= 9'b111111000;
+    rom_dc_gecerli_r[9]  <= 9'b111111100;
+
+    rom_dc_bit_r[10]     <= 9'b111111100;
+    rom_dc_gecerli_r[10] <= 9'b111111110;
+
+    rom_dc_bit_r[11]     <= 9'b111111110;
+    rom_dc_gecerli_r[11] <= 9'b111111111;
+end
+endtask
 
 task rom_ac_init();
 begin
@@ -738,6 +808,10 @@ endtask
 integer i;
 integer j;
 always @* begin
+    dc_degerlendir_ns = dc_degerlendir_r;
+    dc_oku_boyut_ns = dc_oku_boyut_r;
+    dc_ptr_ns = dc_ptr_r;
+    last_dc_blk_ns = last_dc_blk_r;
     hd_durum_ns = hd_durum_r;
     m_hazir_ns = m_hazir_r;
     buf_girdi_ns = buf_girdi_r;
@@ -753,7 +827,11 @@ always @* begin
     gecmis_gecerli_bit_cmb = 0;
     buf_oku_gecmis_ns = `LOW;
 
+    dc_data_cmb = last_dc_blk_r;
+    dc_valid_cmb = `LOW;
+
     ac_satir_one_hot_cmb = (coz_satir_gecerli_r != 0) && ((coz_satir_gecerli_r & (coz_satir_gecerli_r - 1)) == 0);
+    dc_one_hot_cmb = (dc_degerlendir_r != 0) && ((dc_degerlendir_r & (dc_degerlendir_r - 1)) == 0);
 
     ac_satir_one_hot_idx_cmb = 0;
     for (i = 0; i < `HD_AC_TABLO_ROW; i = i + 1) begin
@@ -762,8 +840,25 @@ always @* begin
         end
     end
 
+    dc_one_hot_idx = 0;
+    for (i = 0; i < 12; i = i + 1) begin
+        if (dc_degerlendir_r[i]) begin
+            dc_one_hot_idx = i;
+        end
+    end
+
+    dc_diff_cmb = 0;
+    for (i = 0; i < 11; i = i + 1) begin
+        dc_diff_cmb[i] = i < dc_oku_boyut_r ? buf_girdi_r[(ptr_buf_oku_r + dc_oku_boyut_r - i - 1) % `HD_BUF_BIT]
+                                            : 0;
+    end
+
+    if (!buf_girdi_r[ptr_buf_oku_r]) begin
+        dc_diff_cmb = ~(~dc_diff_cmb & ~(~0 << dc_oku_boyut_r)) + 1;
+    end
+    
     for (i = 0; i < `HD_COZ_ADIM; i = i + 1) begin
-        buf_adim_veri_cmb[`HD_COZ_ADIM - i - 1] = buf_girdi_r[(ptr_buf_oku_r  + i) % `HD_BUF_BIT];
+        buf_adim_veri_cmb[`HD_COZ_ADIM - i - 1] = buf_girdi_r[(ptr_buf_oku_r + i) % `HD_BUF_BIT];
     end
 
     // Su anki adimda tablodaki hangi veriler degerlendiriliyor
@@ -780,19 +875,50 @@ always @* begin
     end
 
     if (m_gecerli_i && m_hazir_o) begin
-        for (i = 0; i < `WB_BIT; i = i + 1) begin
-            buf_girdi_ns[(ptr_buf_yaz_r + i) % `HD_BUF_BIT] = m_veri_i[`WB_BIT - i - 1];
+        for (i = 0; i < `AC_IN_BIT; i = i + 1) begin
+            buf_girdi_ns[(ptr_buf_yaz_r + i) % `HD_BUF_BIT] = m_veri_i[`AC_IN_BIT - i - 1];
         end
-        ptr_buf_yaz_ns = (ptr_buf_yaz_r + `WB_BIT) % `HD_BUF_BIT;
+        ptr_buf_yaz_ns = (ptr_buf_yaz_r + `AC_IN_BIT) % `HD_BUF_BIT;
         buf_bos_ns = `LOW;
     end
 
     case(hd_durum_r)
     DURUM_BOSTA: begin
         if (!buf_bos_r) begin
-            hd_durum_ns = DURUM_AC_COZ;
             ptr_coz_ns = 'd0;
             coz_satir_gecerli_ns = {`HD_AC_TABLO_ROW{`HIGH}};
+            dc_ptr_ns = 0;
+            hd_durum_ns = DURUM_DC_COZ;
+            dc_degerlendir_ns = 12'hFFF;
+        end
+    end
+    DURUM_DC_COZ: begin
+        if (dc_one_hot_cmb) begin
+            hd_durum_ns = DURUM_DC_OKU;
+            dc_oku_boyut_ns = dc_one_hot_idx;
+            dc_ptr_ns = 0;
+        end
+        else if (buf_veri_sayisi_w > 0) begin
+            dc_ptr_ns = dc_ptr_r + 1;
+            ptr_buf_oku_ns = (ptr_buf_oku_r + 1) % `HD_BUF_BIT;
+            for (i = 0; i < 12; i = i + 1) begin
+                if (rom_dc_gecerli_r[i][8 - dc_ptr_r] && (rom_dc_bit_r[i][8 - dc_ptr_r] != buf_girdi_r[ptr_buf_oku_r])) begin
+                    dc_degerlendir_ns[i] = `LOW;
+                end
+            end
+        end
+    end
+    DURUM_DC_OKU: begin
+        if (buf_veri_sayisi_w >= dc_oku_boyut_r) begin
+            last_dc_blk_ns = last_dc_blk_r + dc_diff_cmb;
+            ptr_buf_oku_ns = (ptr_buf_oku_r + dc_oku_boyut_r) % `HD_BUF_BIT;
+            hd_durum_ns = DURUM_DC_GONDER;
+        end
+    end 
+    DURUM_DC_GONDER: begin
+        dc_valid_cmb = `HIGH;
+        if (dc_valid_o && dc_ready_i) begin
+            hd_durum_ns = DURUM_AC_COZ;
         end
     end
     DURUM_AC_COZ: begin
@@ -800,8 +926,13 @@ always @* begin
             nd_run_ns = rom_ac_run_r[ac_satir_one_hot_idx_cmb];
             nd_cat_ns = rom_ac_cat_r[ac_satir_one_hot_idx_cmb];
             nd_gecerli_ns = `HIGH;
-            hd_durum_ns = DURUM_COZ_KONTROL;
-            buf_oku_gecmis_ns = buf_oku_gecmis_r;
+            if (rom_ac_run_r[ac_satir_one_hot_idx_cmb] == 0 && rom_ac_cat_r[ac_satir_one_hot_idx_cmb] == 0) begin
+                hd_durum_ns = DURUM_BOSTA;
+            end
+            else begin
+                hd_durum_ns = DURUM_COZ_KONTROL;
+                buf_oku_gecmis_ns = buf_oku_gecmis_r;
+            end
         end
         else begin
             for (i = 0; i < `HD_AC_TABLO_ROW; i = i + 1) begin
@@ -809,7 +940,6 @@ always @* begin
                     coz_satir_gecerli_ns[i] = `LOW;
                 end
             end
-
             if (buf_veri_sayisi_w >= `HD_COZ_ADIM) begin
                 ptr_buf_oku_ns = (ptr_buf_oku_r + `HD_COZ_ADIM) % `HD_BUF_BIT;
                 ptr_coz_ns = ptr_coz_r + `HD_COZ_ADIM;
@@ -848,6 +978,7 @@ end
 
 always @(posedge clk_i) begin
     if (!rstn_i) begin
+        rom_dc_init();
         rom_ac_init(); // Openlanede initial begin yok?
         hd_durum_r <= DURUM_BOSTA;
         buf_girdi_r <= {`HD_BUF_BIT{1'b0}};
@@ -861,6 +992,10 @@ always @(posedge clk_i) begin
         ptr_coz_r <= 'd0;
         coz_satir_gecerli_r <= 0;
         buf_oku_gecmis_r <= `LOW;
+        dc_ptr_r <= 0;
+        last_dc_blk_r <= 0;
+        dc_degerlendir_r <= 0;
+        dc_oku_boyut_r <= 0;
     end
     else begin
         hd_durum_r <= hd_durum_ns;
@@ -875,6 +1010,10 @@ always @(posedge clk_i) begin
         ptr_coz_r <= ptr_coz_ns;
         coz_satir_gecerli_r <= coz_satir_gecerli_ns;
         buf_oku_gecmis_r <= buf_oku_gecmis_ns;
+        dc_ptr_r <= dc_ptr_ns;
+        last_dc_blk_r <= last_dc_blk_ns;
+        dc_degerlendir_r <= dc_degerlendir_ns;
+        dc_oku_boyut_r <= dc_oku_boyut_ns;
     end
 end
 
@@ -884,5 +1023,8 @@ assign m_hazir_o = m_hazir_r;
 assign nd_run_o = nd_run_r;
 assign nd_cat_o = nd_cat_r;
 assign nd_gecerli_o = nd_gecerli_r;
+
+assign dc_data_o = dc_data_cmb;
+assign dc_valid_o = dc_valid_cmb;
 
 endmodule 
