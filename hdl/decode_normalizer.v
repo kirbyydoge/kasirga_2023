@@ -20,11 +20,41 @@ module decode_normalizer (
 
 localparam BUF_LEN = `BLOCK_SIZE*`IMG_WIDTH;
 
-reg [`PIXEL_BIT-1:0]        buf0_r [0:BUF_LEN-1];
-reg [`PIXEL_BIT-1:0]        buf0_ns [0:BUF_LEN-1];
+reg  [`PIXEL_BIT-1:0]    buf0_wr_data_cmb;
+reg                      buf0_wr_en_cmb;
+reg  [$clog2(BUF_LEN):0] buf0_addr_cmb;
+wire [`PIXEL_BIT-1:0]    buf0_rd_data_w;
 
-reg [`PIXEL_BIT-1:0]        buf1_r [0:BUF_LEN-1];
-reg [`PIXEL_BIT-1:0]        buf1_ns [0:BUF_LEN-1];
+bram_model #(
+    .DATA_WIDTH (`PIXEL_BIT),
+    .BRAM_DEPTH (BUF_LEN)
+)
+buf0 (
+    .clk_i       ( clk_i ),
+    .data_i      ( buf0_wr_data_cmb ),
+    .addr_i      ( buf0_addr_cmb ),
+    .wr_en_i     ( buf0_wr_en_cmb ),
+    .cmd_en_i    ( 1'b1 ),
+    .data_o      ( buf0_rd_data_w )
+);
+
+reg  [`PIXEL_BIT-1:0]    buf1_wr_data_cmb;
+reg                      buf1_wr_en_cmb;
+reg  [$clog2(BUF_LEN):0] buf1_addr_cmb;
+wire [`PIXEL_BIT-1:0]    buf1_rd_data_w;
+
+bram_model #(
+    .DATA_WIDTH (`PIXEL_BIT),
+    .BRAM_DEPTH (BUF_LEN)
+)
+buf1 (
+    .clk_i       ( clk_i ),
+    .data_i      ( buf1_wr_data_cmb ),
+    .addr_i      ( buf1_addr_cmb ),
+    .wr_en_i     ( buf1_wr_en_cmb ),
+    .cmd_en_i    ( 1'b1 ),
+    .data_o      ( buf1_rd_data_w )
+);
 
 reg [`IMG_AREA_BIT-1:0]     ptr_recv_r;
 reg [`IMG_AREA_BIT-1:0]     ptr_recv_ns;
@@ -68,10 +98,6 @@ endfunction
 
 integer i;
 always @* begin
-    for (i = 0; i < BUF_LEN; i = i + 1) begin
-        buf0_ns[i] = buf0_r[i];
-        buf1_ns[i] = buf1_r[i];
-    end
     ptr_recv_ns = ptr_recv_r;
     ptr_send_ns = ptr_send_r;
     recv_durum_ns = recv_durum_r;
@@ -83,9 +109,17 @@ always @* begin
     idct_hazir_cmb = `LOW;
     dn_gecerli_cmb = `LOW;
 
+    buf0_wr_data_cmb = 0;
+    buf0_addr_cmb = ptr_send_r;
+    buf0_wr_en_cmb = `LOW;
+    buf1_wr_data_cmb = 0;
+    buf1_addr_cmb = ptr_send_r;
+    buf1_wr_en_cmb = `LOW;
+
     case(recv_durum_r)
     DURUM_BUF0_KULLAN: begin
         if (ptr_recv_r == BUF_LEN) begin
+            buf0_addr_cmb = 0;
             buf0_valid_ns = `HIGH;
             ptr_recv_ns = 0;
             ctr_block_ns = 0;
@@ -95,7 +129,9 @@ always @* begin
             idct_hazir_cmb = `HIGH;
             if (idct_hazir_o && idct_gecerli_i) begin
                 ptr_recv_ns = ptr_recv_r + 1;
-                buf0_ns[index(idct_row_i, idct_col_i, ctr_block_r)] = idct_veri_i;
+                buf0_wr_data_cmb = idct_veri_i;
+                buf0_wr_en_cmb = `HIGH;
+                buf0_addr_cmb = index(idct_row_i, idct_col_i, ctr_block_r);
                 if (ptr_recv_r % `BLOCK_AREA == `BLOCK_AREA - 1) begin
                     ctr_block_ns = ctr_block_r + 1;
                 end
@@ -104,6 +140,7 @@ always @* begin
     end
     DURUM_BUF1_KULLAN: begin
         if (ptr_recv_r == BUF_LEN) begin
+            buf1_addr_cmb = 0;
             buf1_valid_ns = `HIGH;
             ptr_recv_ns = 0;
             ctr_block_ns = 0;
@@ -113,7 +150,9 @@ always @* begin
             idct_hazir_cmb = `HIGH;
             if (idct_hazir_o && idct_gecerli_i) begin
                 ptr_recv_ns = ptr_recv_r + 1;
-                buf1_ns[index(idct_row_i, idct_col_i, ctr_block_r)] = idct_veri_i;
+                buf1_wr_data_cmb = idct_veri_i;
+                buf1_wr_en_cmb = `HIGH;
+                buf1_addr_cmb = index(idct_row_i, idct_col_i, ctr_block_r);
                 if (ptr_recv_r % `BLOCK_AREA == `BLOCK_AREA - 1) begin
                     ctr_block_ns = ctr_block_r + 1;
                 end
@@ -124,9 +163,10 @@ always @* begin
 
     case(send_durum_r)
     DURUM_BUF0_KULLAN: begin
-        dn_veri_cmb = buf0_r[ptr_send_r];
+        dn_veri_cmb = buf0_rd_data_w;
         dn_gecerli_cmb = buf0_valid_r;
         if (dn_hazir_i && dn_gecerli_o) begin
+            buf0_addr_cmb = ptr_send_r + 1;
             ptr_send_ns = ptr_send_r + 1;
             buf0_valid_ns = ptr_send_r < BUF_LEN - 1;
         end
@@ -137,9 +177,10 @@ always @* begin
         end
     end
     DURUM_BUF1_KULLAN: begin
-        dn_veri_cmb = buf1_r[ptr_send_r];
+        dn_veri_cmb = buf1_rd_data_w;
         dn_gecerli_cmb = buf1_valid_r;
         if (dn_hazir_i && dn_gecerli_o) begin
+            buf1_addr_cmb = ptr_send_r + 1;
             ptr_send_ns = ptr_send_r + 1;
             buf1_valid_ns = ptr_send_r < BUF_LEN - 1;
         end
@@ -163,10 +204,6 @@ always @(posedge clk_i) begin
         ctr_block_r <= 0;
     end
     else begin
-        for (i = 0; i < BUF_LEN; i = i + 1) begin
-            buf0_r[i] <= buf0_ns[i];
-            buf1_r[i] <= buf1_ns[i];
-        end
         ptr_recv_r <= ptr_recv_ns;
         ptr_send_r <= ptr_send_ns;
         recv_durum_r <= recv_durum_ns;

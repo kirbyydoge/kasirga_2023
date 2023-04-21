@@ -74,7 +74,7 @@ wire        coz_hazir_w;
 
 assign m_veri_w = rx_fifo_rd_data_w;
 assign m_gecerli_w = !rx_fifo_empty_w;
-assign rx_fifo_rd_en_w = m_hazir_w
+assign rx_fifo_rd_en_w = m_hazir_w;
 
 jpeg_coz jc (
     .clk_i          ( clk_i ),
@@ -109,7 +109,7 @@ gorev_birimi gb (
     .gorev_i        ( gb_gorev_w ),
     .etkin_i        ( gb_coz_etkin_w ),
     .pixel_i        ( gb_coz_pixel_w ),
-    .coz_stall_o    ( gb_coz_stall_w )
+    .coz_stall_o    ( gb_coz_stall_w ),
     .stal_i         ( gb_stall_w ),
     .etkin_o        ( gb_etkin_w ),
     .pixel_o        ( gb_pixel_w )

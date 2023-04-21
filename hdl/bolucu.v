@@ -2,7 +2,7 @@
  
 `include "sabitler.vh"
 
-module histogram_top (
+module bolucu (
     input clk,
     input rstn_i,
     input etkin_i,
