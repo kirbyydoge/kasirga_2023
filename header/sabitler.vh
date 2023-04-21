@@ -1,3 +1,9 @@
+`define FPGA
+//`define CARAVEL
+
+`define CLK_HZ              100_000_000
+`define BAUD_RATE           9600
+
 `define HIGH                1'b1
 `define LOW                 1'b0
 

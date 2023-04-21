@@ -7,6 +7,7 @@ module medyan_top (
     input                       rstn_i,
     input                       etkin_i,
     input[71:0]                 resim_i,
+    input                       stal_i,
     output                      etkin_o,
     output[`PIXEL_BIT-1:0]      pixel_o
 );
@@ -32,6 +33,7 @@ generate
         .clk_i(clk_i),
         .rstn_i(rstn_i),
         .etkin_i(etkin_cmb[j]),
+        .stal_i(stal_i),
         .sayi_i(sayi_cmb[j]),
         .medyan_o(medyan_w[j]),
         .hazir_o(hazir_w[j])
@@ -95,12 +97,14 @@ always@(posedge clk_i) begin
         cikis_sayac_r <= 0;
         etkin_cmb1 <= 0; 
     end else begin
-        for(i=0;i<10;i=i+1) begin
-            resim_r[i] <= resim_ns[i];
+        if(!stal_i) begin
+            for(i=0;i<10;i=i+1) begin
+                resim_r[i] <= resim_ns[i];
+            end
+            giris_sayac_r <= giris_sayac_ns;
+            cikis_sayac_r <= cikis_sayac_ns;
+            etkin_cmb1 <= etkin_cmb;
         end
-        giris_sayac_r <= giris_sayac_ns;
-        cikis_sayac_r <= cikis_sayac_ns;
-        etkin_cmb1 <= etkin_cmb;
     end
 end
 endmodule

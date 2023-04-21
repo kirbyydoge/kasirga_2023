@@ -7,6 +7,7 @@ module medyan_birimi (
     input                       rstn_i,
     input                       etkin_i,
     input [`PIXEL_BIT-1:0]      sayi_i,
+    input                       stal_i,
     output [`PIXEL_BIT-1:0]     medyan_o,
     output                      hazir_o                      
 );
@@ -72,9 +73,10 @@ always @ (posedge clk_i) begin
 
     end
     else begin
-        sayilar_r <= sayilar_ns;
-        hazir_sayac_r <= hazir_sayac_ns;
-
+        if(!stal_i) begin
+            sayilar_r <= sayilar_ns;
+            hazir_sayac_r <= hazir_sayac_ns;
+        end
     end
 end
 assign hazir_o = hazir_cmb;

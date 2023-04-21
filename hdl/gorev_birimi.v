@@ -9,8 +9,9 @@ module gorev_birimi (
     input                       etkin_i,
     input   [`PIXEL_BIT-1:0]    pixel_i,
     input   [`GRV_BIT-1:0]      gorev_i,
+    input                       stal_i,
     output                      etkin_o,
-    output  [23:0]              pixel_o
+    output  [`PIXEL_BIT-1:0]    pixel_o
 );
 
 reg etkin_cmb;
@@ -41,6 +42,7 @@ evrisim_birimi eb0 (
     .gaus_i(gaus_cmb0),
     .veri_etkin_i(veri_etkin_cmb0),
     .veri_i(veri_cmb0),
+    .stal_i(stal_i),
     .laplacian_i(laplacian_cmb0),
     .laplacian_pixel_i(laplacian_pixel_cmb0),
     .laplacian_pixel_o(laplacian_pixel_w0),
@@ -72,6 +74,7 @@ evrisim_birimi eb1 (
     .gaus_i(gaus_cmb1),
     .veri_etkin_i(veri_etkin_cmb1),
     .veri_i(veri_cmb1),
+    .stal_i(stal_i),
     .laplacian_i(laplacian_cmb1),
     .laplacian_pixel_i(laplacian_pixel_cmb1),
     .laplacian_pixel_o(laplacian_pixel_w1),
@@ -102,6 +105,7 @@ evrisim_birimi eb2 (
     .gaus_i(gaus_cmb2),
     .veri_etkin_i(veri_etkin_cmb2),
     .veri_i(veri_cmb2),
+    .stal_i(stal_i),
     .laplacian_i(laplacian_cmb2),
     .laplacian_pixel_i(laplacian_pixel_cmb2),
     .laplacian_pixel_o(laplacian_pixel_w2),
@@ -121,6 +125,7 @@ medyan_top mdyn (
     .rstn_i(rstn_i),
     .etkin_i(etkin_m_cmb),
     .resim_i(resim_m_cmb),
+    .stal_i(stal_i),
     .etkin_o(etkin_m_w),
     .pixel_o(pixel_m_w)
 );
@@ -130,6 +135,7 @@ histogram_top ht (
     .rstn_i(rstn_i),
     .etkin_i(etkin_h_cmb),
     .pixel_i(pixel_h_cmb),
+    .stal_i(stal_i),
     .wr_en_s_o(wr_en_h_w),
     .addr_w_s_o(addr_w_h_w),
     .data_in_s_o(data_in_h_w),
@@ -150,6 +156,13 @@ reg [16:0] data_out_h_cmb;
 wire[23:0] pixel_h_w;
 wire    hazir_h_w;
 
+reg wr_en_s_cmb;
+reg[7:0] addr_w_s_cmb;
+reg[16:0] data_in_s_cmb;
+reg rd_en_s_cmb;
+reg[7:0] addr_r_s_cmb;
+wire[17:0] data_out_s_w;
+
 sram_histogram memory (
     .clk0 (clk_i),
 	.csb0 (wr_en_s_cmb),
@@ -160,12 +173,7 @@ sram_histogram memory (
     .addr1 (addr_r_s_cmb),
     .dout1 (data_out_s_w)
 );
-reg wr_en_s_cmb;
-reg[7:0] addr_w_s_cmb;
-reg[16:0] data_in_s_cmb;
-reg rd_en_s_cmb;
-reg[7:0] addr_r_s_cmb;
-wire[17:0] data_out_s_w;
+
 
 reg[1:0] he_o_etkin, he_o_etkin_ns;
 reg[7:0] he_o_pixel, he_o_pixel_ns;
@@ -231,7 +239,7 @@ always@* begin
                 tasma_cmb1=0;
 
 
-                filtre_cmb2 = `SOBEL_Y_FLTR;;
+                filtre_cmb2 = `SOBEL_Y_FLTR;
                 filtre_etkin_cmb2 = `HIGH;
                 gaus_cmb2=0;
                 laplacian_cmb2=0;
@@ -437,9 +445,11 @@ always@(posedge clk_i) begin
         he_o_etkin <= 0;
         he_o_pixel <= 0;
     end else begin
-        durum <= durum_ns;
-        he_o_etkin <= he_o_etkin_ns;
-        he_o_pixel <= he_o_pixel_ns;
+        if(!stal_i) begin
+            durum <= durum_ns;
+            he_o_etkin <= he_o_etkin_ns;
+            he_o_pixel <= he_o_pixel_ns;
+        end
     end
 end
 

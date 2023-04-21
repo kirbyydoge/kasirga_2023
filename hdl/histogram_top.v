@@ -7,6 +7,7 @@ module histogram_top (
     input                       rstn_i,
     input                       etkin_i,
     input  [`PIXEL_BIT-1:0]     pixel_i,
+    input                       stal_i,
     output                      wr_en_s_o,
     output [`PIXEL_BIT-1:0]     addr_w_s_o,
     output [16:0]               data_in_s_o,
@@ -27,6 +28,7 @@ histogram_birimi hb (
     .rstn_i(rstn_i),
     .etkin_i(etkin_i),
     .pixel_i(pixel_i), 
+    .stal_i(stal_i),
     .wr_en_o(wr_en_o),
     .addr_w_o(addr_w_o),
     .data_in_o(data_in_o),
@@ -51,6 +53,7 @@ histogram_esitleme he (
     .clk_i(clk_i),
     .rstn_i(rstn_i),
     .etkin_i(he_etkin),
+    .stal_i(stal_i),
     .cdf_min_i(he_cdf_min),
     .pixel_i(he_pixel_cmb),
     .cdf_i(he_cdf),
@@ -95,6 +98,16 @@ wire[255:0] valid_w;
 
 reg[7:0] he_adres,he_adres_ns;
 
+reg wr_en_last;
+reg[7:0] addr_w_last;
+reg[16:0] data_in_last;
+reg rd_en_last;
+reg[7:0] addr_r_last;
+reg he_hazir_last;
+reg[7:0] he_adres_last;
+reg[16:0] he_sonuc_last;
+reg[7:0] rd_adres_last;
+
 always@* begin
     rd_adres_ns = rd_adres;
     valid_r_ns = valid_r;
@@ -131,18 +144,18 @@ always@* begin
             pixel_r_ns = data_out_w;    
         end
         HB: begin
-            wr_en_cmb = wr_en_o;
-            addr_w_cmb = addr_w_o;
-            data_in_cmb = data_in_o;
-            rd_en_cmb = rd_en_o;
-            addr_r_cmb = addr_r_o;
+            wr_en_cmb = stal_i ? wr_en_last : wr_en_o;
+            addr_w_cmb = stal_i ? addr_w_last : addr_w_o;
+            data_in_cmb = stal_i ? data_in_last : data_in_o;
+            rd_en_cmb = stal_i ? rd_en_last : rd_en_o;
+            addr_r_cmb = stal_i ? addr_r_last : addr_r_o;
         end
         HE: begin
-            wr_en_cmb = !he_hazir_w;
-            addr_w_cmb = he_adres;
-            data_in_cmb = he_sonuc_w;
+            wr_en_cmb = stal_i ? !he_hazir_last : !he_hazir_w;
+            addr_w_cmb = stal_i ? he_adres_last : he_adres;
+            data_in_cmb = stal_i ? he_sonuc_last : he_sonuc_w;
             rd_en_cmb = `LOW;
-            addr_r_cmb = rd_adres;
+            addr_r_cmb = stal_i ? rd_adres_last : rd_adres;
             if(he_adres == 255) begin
                 sram_kontrol_ns=bekle;
                 rd_adres_ns = 0;
@@ -189,17 +202,38 @@ always@(posedge clk_i) begin
         he_adres <= 0;
         hazir_r <= 0;
         pixel_r <= 0;
+        wr_en_last <= 0;
+        addr_w_last <= 0;
+        data_in_last <= 0;
+        rd_en_last <= 0;
+        addr_r_last <= 0;
+        he_hazir_last <= 0;
+        he_adres_last <= 0;
+        he_sonuc_last <= 0;
+        rd_adres_last <= 0;
+
     end else begin
-        sram_kontrol <= sram_kontrol_ns;
-        cdf_min_r <= cdf_min_r_ns;
-        valid_r <= valid_r_ns;
-        rd_adres <= rd_adres_ns;
-        he_cdf <= he_cdf_ns;
-        he_etkin <= he_etkin_ns;
-        he_cdf_min <= he_cdf_min_ns;
-        he_adres <= he_adres_ns;
-        hazir_r <= hazir_r_ns;
-        pixel_r <= pixel_r_ns;
+        if(!stal_i) begin
+            sram_kontrol <= sram_kontrol_ns;
+            cdf_min_r <= cdf_min_r_ns;
+            valid_r <= valid_r_ns;
+            rd_adres <= rd_adres_ns;
+            he_cdf <= he_cdf_ns;
+            he_etkin <= he_etkin_ns;
+            he_cdf_min <= he_cdf_min_ns;
+            he_adres <= he_adres_ns;
+            hazir_r <= hazir_r_ns;
+            pixel_r <= pixel_r_ns;
+            wr_en_last <= wr_en_o;
+            addr_w_last <= addr_w_o;
+            data_in_last <= data_in_o;
+            rd_en_last <= rd_en_o;
+            addr_r_last <= addr_r_o;
+            he_hazir_last <= he_hazir_w;
+            he_adres_last <= he_adres;
+            he_sonuc_last <= he_sonuc_w;
+            rd_adres_last <= rd_adres;
+        end
     end
 end
 

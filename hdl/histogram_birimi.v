@@ -7,6 +7,7 @@ module histogram_birimi (
     input                       rstn_i,
     input                       etkin_i,
     input  [`PIXEL_BIT-1:0]     pixel_i,
+    input                       stal_i,
 	output                      wr_en_o,
 	output [`PIXEL_BIT-1:0]     addr_w_o,
 	output [16:0]               data_in_o,
@@ -67,6 +68,18 @@ reg rd_en_cmb;
 reg [`PIXEL_BIT-1:0] addr_r_cmb;
 wire [16:0] data_out_w;
 
+reg[7:0]    addr_r_last;
+reg[7:0]    addr_w_last;
+reg         rd_en_last;
+reg         wr_en_last;
+reg[16:0]   data_in_last;
+/*
+assign wr_en_o = stal_i ? !wr_en_last : !wr_en_cmb;
+assign addr_w_o = stal_i ? addr_w_last : addr_w_cmb;
+assign data_in_o = stal_i ? data_in_last : data_in_cmb;
+assign rd_en_o = stal_i ? !rd_en_last : !rd_en_cmb;
+assign addr_r_o = stal_i ? addr_r_last : addr_r_cmb;
+assign data_out_w = data_out_i;*/
 assign wr_en_o = !wr_en_cmb;
 assign addr_w_o = addr_w_cmb;
 assign data_in_o = data_in_cmb;
@@ -75,6 +88,8 @@ assign addr_r_o = addr_r_cmb;
 assign data_out_w = data_out_i;
 
 reg isaret, isaret_ns;
+
+
 
 always @* begin
     durum_ns = durum_r;
@@ -143,11 +158,11 @@ always @* begin
                         flag_ns = 0;
                         cache_line1_ns = pixel_i;
                         cache_line1_counter_ns = 1;
-    
                     end
                     sayac_ns = IKI;
                 end
                 IKI: begin
+                    
                     wr_en_cmb = `HIGH;
                     addr_w_cmb = cache_line2_r;
                     data_in_cmb = cache_line2_counter_r;
@@ -242,23 +257,37 @@ always @(posedge clk_i) begin
         cdf_min_sayac <= 0;
         durum_r <= BIR;
         isaret <= 0;
+        addr_r_last <= 0;
+        addr_w_last <= 0;
+        rd_en_last <= 0;
+        wr_en_last <= 0;
+        data_in_last <= 0;
+
     end 
 
     else begin
-        cache_line1_r <= cache_line1_ns;
-        cache_line2_r <= cache_line2_ns;
-        cache_line3_r <= cache_line3_ns;
-        cache_line1_counter_r <= cache_line1_counter_ns;
-        cache_line2_counter_r <= cache_line2_counter_ns;
-        cache_line3_counter_r <= cache_line3_counter_ns;
-        sayac_r <= sayac_ns;
-        valid_r <= valid_ns;
-        flag_r <= flag_ns; 
-        pixel_sayac_r <= pixel_sayac_ns;  
-        durum_r <= durum_ns;
-        cdf_min_pixel <= cdf_min_pixel_ns;
-        cdf_min_sayac <= cdf_min_sayac_ns;
-        isaret <= isaret_ns;
+        if(!stal_i) begin
+            cache_line1_r <= cache_line1_ns;
+            cache_line2_r <= cache_line2_ns;
+            cache_line3_r <= cache_line3_ns;
+            cache_line1_counter_r <= cache_line1_counter_ns;
+            cache_line2_counter_r <= cache_line2_counter_ns;
+            cache_line3_counter_r <= cache_line3_counter_ns;
+            sayac_r <= sayac_ns;
+            valid_r <= valid_ns;
+            flag_r <= flag_ns; 
+            pixel_sayac_r <= pixel_sayac_ns;  
+            durum_r <= durum_ns;
+            cdf_min_pixel <= cdf_min_pixel_ns;
+            cdf_min_sayac <= cdf_min_sayac_ns;
+            isaret <= isaret_ns;
+            addr_r_last <= addr_r_cmb;
+            addr_w_last <= addr_w_cmb;
+            rd_en_last <= rd_en_cmb;
+            wr_en_last <= wr_en_cmb;
+            data_in_last <= data_in_cmb;
+
+        end
     end
 end
 

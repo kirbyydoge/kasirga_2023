@@ -41,6 +41,9 @@ filter = np.array([[1, 2, 1], [2, 4, 2], [1, 2, 1]], dtype=np.float32)
 filtered_pixels = np.zeros_like(img_padded, dtype=np.int64)
 for i in range(1, img_padded.shape[0] - 1):
     for j in range(1, img_padded.shape[1] - 1):
+        if i==1:
+            if j==118:
+                print(my_round( np.sum(img_padded[i-1:i+2, j-1:j+2] * filter) / 16))
         filtered_pixels[i, j] = np.sum(img_padded[i-1:i+2, j-1:j+2] * filter)
 
 # Sonuç matrisindeki elemanları istenilen şekilde düzenle ve txt dosyasına kaydet
