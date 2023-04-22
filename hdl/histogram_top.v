@@ -23,6 +23,27 @@ assign hazir_o = hazir_r[1];
 reg[23:0] pixel_r,pixel_r_ns;
 assign pixel_o = pixel_r;
 
+
+wire hazir_hb_w;
+
+reg                     wr_en_cmb;
+reg [`PIXEL_BIT-1:0]    addr_w_cmb;
+reg [16:0]              data_in_cmb;
+reg                     rd_en_cmb;
+reg [`PIXEL_BIT-1:0]    addr_r_cmb;
+wire[16:0]              data_out_w;
+
+wire                    wr_en_o;
+wire [`PIXEL_BIT-1:0]   addr_w_o;
+wire [16:0]             data_in_o;
+wire                    rd_en_o;
+wire [`PIXEL_BIT-1:0]   addr_r_o;
+wire [16:0]             cdf_min_w;
+
+reg [16:0] cdf_min_r,cdf_min_r_ns;
+reg [255:0] valid_r,valid_r_ns;
+wire[255:0] valid_w;
+
 histogram_birimi hb (
     .clk_i(clk_i),
     .rstn_i(rstn_i),
@@ -40,14 +61,15 @@ histogram_birimi hb (
     .hazir_o(hazir_hb_w)
 );
 
-wire hazir_hb_w;
+reg [`PIXEL_BIT:0] rd_adres,rd_adres_ns;
+reg[16:0] he_cdf_min,he_cdf_min_ns;
+wire[7:0] he_pixel_cmb;
+assign he_pixel_cmb = rd_adres - 2;
+wire[7:0] he_sonuc_w;
+wire he_hazir_w;
 
-reg                     wr_en_cmb;
-reg [`PIXEL_BIT-1:0]    addr_w_cmb;
-reg [16:0]              data_in_cmb;
-reg                     rd_en_cmb;
-reg [`PIXEL_BIT-1:0]    addr_r_cmb;
-wire[16:0]              data_out_w;
+reg he_etkin,he_etkin_ns;
+reg[16:0] he_cdf,he_cdf_ns;
 
 histogram_esitleme he (
     .clk_i(clk_i),
@@ -55,21 +77,15 @@ histogram_esitleme he (
     .etkin_i(he_etkin),
     .stal_i(stal_i),
     .cdf_min_i(he_cdf_min),
-    .pixel_i(he_pixel_cmb),
     .cdf_i(he_cdf),
     .sonuc_o(he_sonuc_w),
     .hazir_o(he_hazir_w)
 );
 
-reg[16:0] he_cdf_min,he_cdf_min_ns;
-wire[7:0] he_pixel_cmb;
-assign he_pixel_cmb = rd_adres - 2;
-wire[7:0] he_sonuc_w;
-wire he_hazir_w;
 
-reg [`PIXEL_BIT:0] rd_adres,rd_adres_ns;
-reg he_etkin,he_etkin_ns;
-reg[16:0] he_cdf,he_cdf_ns;
+
+
+
 
 assign wr_en_s_o = wr_en_cmb;
 assign addr_w_s_o = addr_w_cmb;
@@ -78,22 +94,14 @@ assign rd_en_s_o = rd_en_cmb;
 assign addr_r_s_o = addr_r_cmb;
 assign data_out_w = data_out_s_i;
 
-wire                    wr_en_o;
-wire [`PIXEL_BIT-1:0]   addr_w_o;
-wire [16:0]             data_in_o;
-wire                    rd_en_o;
-wire [`PIXEL_BIT-1:0]   addr_r_o;
-wire                    hazir_o;
-wire [16:0]             cdf_min_w;
+
 
 localparam bekle=0;
 localparam HB=1;
 localparam HE=2;
 reg[1:0] sram_kontrol,sram_kontrol_ns;
 
-reg [16:0] cdf_min_r,cdf_min_r_ns;
-reg [255:0] valid_r,valid_r_ns;
-wire[255:0] valid_w;
+
 
 
 reg[7:0] he_adres,he_adres_ns;
@@ -160,18 +168,16 @@ always@* begin
                 sram_kontrol_ns=bekle;
                 rd_adres_ns = 0;
             end
+            
             if(rd_adres == 257) begin
                 he_etkin_ns = `LOW;
                 rd_adres_ns = rd_adres +1;;
                 rd_en_cmb = `HIGH;
-                //hazir_r_ns = {hazir_r[0],1'b1};
             end
             if(rd_adres == 256) begin
                 he_etkin_ns = `HIGH;
                 rd_adres_ns = rd_adres+1;
                 he_cdf_ns = valid_r[rd_adres-1] ? (he_cdf + data_out_w) : he_cdf;
-                rd_en_cmb = `HIGH;
-                //hazir_r_ns = {hazir_r[0],1'b1};
             end
             if(rd_adres > 0 && rd_adres < 256) begin
                 rd_adres_ns = rd_adres+1;

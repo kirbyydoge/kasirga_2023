@@ -14,11 +14,11 @@ module evrisim_birimi (
     input                       laplacian_i,
     input                       gr2bw_erosion_i,
     input                       tasma_i,
-    input        [10:0]          laplacian_pixel_i,           
+    input        [10:0]         laplacian_pixel_i,           
     output       [71:0]         medyan_o,
-    output       [10:0]          laplacian_pixel_o,
+    output       [10:0]         laplacian_pixel_o,
     output                      veri_etkin_o,
-    output       [10:0]          veri_o
+    output       [10:0]         veri_o
 
 );
 
@@ -28,9 +28,12 @@ module evrisim_birimi (
     reg tasma_r, tasma_ns;
 
     reg veri_etkin_o_r;
-    //assign veri_etkin_o = veri_etkin_o_r;
+    reg veri1_etkin_o_r,veri1_etkin_o_ns;
     assign veri_etkin_o = veri1_etkin_o_r;
 
+    reg[10:0] resim1_r [8:0];
+    reg[10:0] resim1_r_ns [8:0];
+    
     assign laplacian_pixel_o = {2'd0,resim1_r[4]};
 
     reg [31:0] mul_cmb;
@@ -48,9 +51,8 @@ module evrisim_birimi (
     reg[10:0] resim_r [8:0];
     reg[10:0] resim_r_ns [8:0];
 
-    reg[10:0] resim1_r [8:0];
-    reg[10:0] resim1_r_ns [8:0];
-    reg veri1_etkin_o_r,veri1_etkin_o_ns;
+    
+    
   
 
     assign medyan_o ={resim1_r[0][7:0],resim1_r[1][7:0],resim1_r[2][7:0],resim1_r[3][7:0],resim1_r[4][7:0],resim1_r[5][7:0],resim1_r[6][7:0],resim1_r[7][7:0],resim1_r[8][7:0]};
@@ -176,86 +178,6 @@ module evrisim_birimi (
     .addr1 (addr1_i_sram2),
     .dout1 (data_o_sram2)
     );
-    /*
-    wire wr_en_sram0;
-    assign wr_en_sram0 = cmd_en_i_w[0] & wr_en_i_w[0];
-    wire wr_en_sram1;
-    assign wr_en_sram1 = cmd_en_i_w[1] & wr_en_i_w[1];
-    wire wr_en_sram2;
-    assign wr_en_sram2 = cmd_en_i_w[2] & wr_en_i_w[2];
-    
-    wire rd_en_sram0;
-    assign rd_en_sram0 = cmd_en_i_w[0] & (cmd_en_i_w[0] ^  wr_en_i_w[0]);
-    wire rd_en_sram1;
-    assign rd_en_sram1 = cmd_en_i_w[1] & (cmd_en_i_w[1] ^  wr_en_i_w[1]); 
-    wire rd_en_sram2;
-    assign rd_en_sram2 = cmd_en_i_w[2] & (cmd_en_i_w[2] ^  wr_en_i_w[2]);
-
-    sram_evrisim sram_0 (
-    .clk0 (clk_i),
-    .csb0 (!wr_en_sram0),
-    .addr0 ((stal_i ? addr_i_w[0] +1 :addr_i_w[0] )),
-    .din0 (data_i_w[0]),
-    .clk1 (clk_i),
-    .csb1 (!rd_en_sram0),
-    .addr1 ((stal_i ? addr_i_w[0] -1 :addr_i_w[0] )),
-    .dout1 (data_o_w[0])
-    );
-
-    sram_evrisim sram_1 (
-    .clk0 (clk_i),
-    .csb0 (!wr_en_sram1),
-    .addr0 ((stal_i ? addr_i_w[1] +1 :addr_i_w[1] )),
-    .din0 (data_i_w[1]),
-    .clk1 (clk_i),
-    .csb1 (!rd_en_sram1),
-    .addr1 ((stal_i ? addr_i_w[1] -1 :addr_i_w[1] )),
-    .dout1 (data_o_w[1])
-    );
-
-    sram_evrisim sram_2 (
-    .clk0 (clk_i),
-    .csb0 (!wr_en_sram2),
-    .addr0 ((stal_i ? addr_i_w[2] +1 :addr_i_w[2] )),
-    .din0 (data_i_w[2]),
-    .clk1 (clk_i),
-    .csb1 (!rd_en_sram2),
-    .addr1 ((stal_i ? addr_i_w[2] -1 :addr_i_w[2] )),
-    .dout1 (data_o_w[2])
-    );*/
-    /*
-    bram_model 
-    #(.DATA_WIDTH(8), .BRAM_DEPTH(320))
-    bram_0 (
-        .clk_i      (clk_i )    ,
-        .data_i     (data_i_w[0] ) ,
-        .addr_i     (addr_i_w[0])  ,
-        .wr_en_i    (wr_en_i_w[0]) ,
-        .cmd_en_i   (cmd_en_i_w[0]),
-        .data_o     (data_o_w[0])
-    );
-
-    bram_model 
-    #(.DATA_WIDTH(8), .BRAM_DEPTH(320))
-    bram_1 (
-        .clk_i      (clk_i )    ,
-        .data_i     (data_i_w[1] ) ,
-        .addr_i     (addr_i_w[1])  ,
-        .wr_en_i    (wr_en_i_w[1]) ,
-        .cmd_en_i   (cmd_en_i_w[1]),
-        .data_o     (data_o_w[1])
-    );
-
-    bram_model 
-    #(.DATA_WIDTH(8), .BRAM_DEPTH(320))
-    bram_2 (
-        .clk_i      (clk_i )    ,
-        .data_i     (data_i_w[2] ) ,
-        .addr_i     (addr_i_w[2])  ,
-        .wr_en_i    (wr_en_i_w[2]) ,
-        .cmd_en_i   (cmd_en_i_w[2]),
-        .data_o     (data_o_w[2])
-    );*/
     
     integer i;
     always @* begin

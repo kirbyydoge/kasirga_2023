@@ -19,9 +19,10 @@ module histogram_birimi (
     output                      hazir_o
 );
 
+reg [16:0]  cdf_min_sayac,cdf_min_sayac_ns;
 assign cdf_min_o=cdf_min_sayac;
 reg [`PIXEL_BIT-1:0] cdf_min_pixel,cdf_min_pixel_ns;
-reg [16:0]  cdf_min_sayac,cdf_min_sayac_ns;
+
 
 reg [`PIXEL_BIT-1:0] cache_line1_r;
 reg [`PIXEL_BIT-1:0] cache_line1_ns;
@@ -68,18 +69,6 @@ reg rd_en_cmb;
 reg [`PIXEL_BIT-1:0] addr_r_cmb;
 wire [16:0] data_out_w;
 
-reg[7:0]    addr_r_last;
-reg[7:0]    addr_w_last;
-reg         rd_en_last;
-reg         wr_en_last;
-reg[16:0]   data_in_last;
-/*
-assign wr_en_o = stal_i ? !wr_en_last : !wr_en_cmb;
-assign addr_w_o = stal_i ? addr_w_last : addr_w_cmb;
-assign data_in_o = stal_i ? data_in_last : data_in_cmb;
-assign rd_en_o = stal_i ? !rd_en_last : !rd_en_cmb;
-assign addr_r_o = stal_i ? addr_r_last : addr_r_cmb;
-assign data_out_w = data_out_i;*/
 assign wr_en_o = !wr_en_cmb;
 assign addr_w_o = addr_w_cmb;
 assign data_in_o = data_in_cmb;
@@ -207,7 +196,6 @@ always @* begin
     if(isaret & !etkin_i) begin
         case (durum_r) 
             X: begin
-                //durum_ns = BIR;
                 flag_ns = 0;
                 pixel_sayac_ns = 0;
                 isaret_ns =0;
@@ -231,7 +219,6 @@ always @* begin
                 wr_en_cmb = `HIGH;
                 addr_w_cmb = cache_line3_r;
                 data_in_cmb = cache_line3_counter_r; 
-                //durum_ns = BIR;
                 durum_ns = X;
                 pixel_sayac_ns = pixel_sayac_r + 1; 
             end
@@ -257,11 +244,6 @@ always @(posedge clk_i) begin
         cdf_min_sayac <= 0;
         durum_r <= BIR;
         isaret <= 0;
-        addr_r_last <= 0;
-        addr_w_last <= 0;
-        rd_en_last <= 0;
-        wr_en_last <= 0;
-        data_in_last <= 0;
 
     end 
 
@@ -281,11 +263,6 @@ always @(posedge clk_i) begin
             cdf_min_pixel <= cdf_min_pixel_ns;
             cdf_min_sayac <= cdf_min_sayac_ns;
             isaret <= isaret_ns;
-            addr_r_last <= addr_r_cmb;
-            addr_w_last <= addr_w_cmb;
-            rd_en_last <= rd_en_cmb;
-            wr_en_last <= wr_en_cmb;
-            data_in_last <= data_in_cmb;
 
         end
     end
