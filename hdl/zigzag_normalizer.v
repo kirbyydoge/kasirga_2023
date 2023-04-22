@@ -6,16 +6,17 @@ module zigzag_normalizer (
     input                       clk_i,
     input                       rstn_i,
 
+    input                       blok_son_i,
+
     input   [`RUN_BIT-1:0]      hd_run_i,
-    input   [`CAT_BIT-1:0]      hd_cat_i,
+    input   [`HDATA_BIT-1:0]    hd_veri_i,
     input                       hd_gecerli_i,
     output                      hd_hazir_o,
 
-    output  [`PIXEL_BIT-1:0]    ct_veri_o,
+    output  [`HDATA_BIT-1:0]    ct_veri_o,
     output  [`BLOCK_BIT-1:0]    ct_row_o,
     output  [`BLOCK_BIT-1:0]    ct_col_o,
     output                      ct_gecerli_o,
-    output                      ct_blok_son_o,
     input                       ct_hazir_i
 );
 
@@ -24,8 +25,8 @@ reg [`BLOCK_AREA_BIT-1:0] rom_zigzag_order_r [0:`BLOCK_AREA-1];
 reg [`BLOCK_AREA_BIT-1:0] ptr_block_r;
 reg [`BLOCK_AREA_BIT-1:0] ptr_block_ns;
 
-reg [`PIXEL_BIT-1:0] ct_veri_r;
-reg [`PIXEL_BIT-1:0] ct_veri_ns;
+reg [`HDATA_BIT-1:0] ct_veri_r;
+reg [`HDATA_BIT-1:0] ct_veri_ns;
 
 reg [`BLOCK_BIT-1:0] ct_row_r;
 reg [`BLOCK_BIT-1:0] ct_row_ns;
@@ -36,14 +37,11 @@ reg [`BLOCK_BIT-1:0] ct_col_ns;
 reg                  ct_gecerli_r;
 reg                  ct_gecerli_ns;
 
-reg                  ct_blok_son_r;
-reg                  ct_blok_son_ns;
-
 reg [`RUN_BIT-1:0]   buf_run_r;
 reg [`RUN_BIT-1:0]   buf_run_ns;
 
-reg [`CAT_BIT-1:0]   buf_cat_r;
-reg [`CAT_BIT-1:0]   buf_cat_ns;
+reg [`HDATA_BIT-1:0] buf_data_r;
+reg [`HDATA_BIT-1:0] buf_data_ns;
 
 reg                  buf_gecerli_r;
 reg                  buf_gecerli_ns;
@@ -53,6 +51,9 @@ localparam           BEKLE = 'd1;
 
 reg                  durum_r;
 reg                  durum_ns;
+
+reg                  blk_flag_r;
+reg                  blk_flag_ns;
 
 reg                  hd_hazir_cmb;
 
@@ -131,24 +132,25 @@ always @* begin
     ct_row_ns = ct_row_r;
     ct_col_ns = ct_col_r;
     ct_gecerli_ns = ct_gecerli_r;
-    ct_blok_son_ns = ct_blok_son_r;
     buf_run_ns = buf_run_r;
-    buf_cat_ns = buf_cat_r;
+    buf_data_ns = buf_data_r;
     durum_ns = durum_r;
     buf_gecerli_ns = buf_gecerli_r;
     hd_hazir_cmb = `HIGH;
 
+    if (blok_son_i) begin
+        ptr_block_ns = 0;
+    end
+
     if (ct_gecerli_o && ct_hazir_i) begin
         ct_gecerli_ns = `LOW;
-        ct_blok_son_ns = `LOW;
     end
 
     if (buf_gecerli_r && !(ct_gecerli_o && !ct_hazir_i)) begin
         ct_row_ns = rom_zigzag_order_r[ptr_block_r - 1] >> 6'd3; // div 8
         ct_col_ns = rom_zigzag_order_r[ptr_block_r - 1] & 6'h7;  // mod 8
         ct_gecerli_ns = `HIGH;
-        ct_blok_son_ns = buf_run_r == 0 && buf_cat_r == 0;
-        ct_veri_ns = buf_cat_r;
+        ct_veri_ns = buf_data_r;
         buf_gecerli_ns = `LOW;
     end
 
@@ -156,7 +158,7 @@ always @* begin
     HAZIR: begin
         if (hd_hazir_o && hd_gecerli_i) begin
             buf_run_ns = hd_run_i;
-            buf_cat_ns = hd_cat_i;
+            buf_data_ns = hd_veri_i;
             buf_gecerli_ns = `HIGH;
             ptr_block_ns = ptr_block_r + hd_run_i + 1;
             if (ct_gecerli_o && !ct_hazir_i) begin
@@ -181,9 +183,7 @@ always @(posedge clk_i) begin
         ct_row_r <= 0;
         ct_col_r <= 0;
         ct_gecerli_r <= 0;
-        ct_blok_son_r <= 0;
         buf_run_r <= 0;
-        buf_cat_r <= 0;
         buf_gecerli_r <= 0;
         durum_r <= HAZIR;
     end
@@ -193,9 +193,8 @@ always @(posedge clk_i) begin
         ct_row_r <= ct_row_ns;
         ct_col_r <= ct_col_ns;
         ct_gecerli_r <= ct_gecerli_ns;
-        ct_blok_son_r <= ct_blok_son_ns;
         buf_run_r <= buf_run_ns;
-        buf_cat_r <= buf_cat_ns;
+        buf_data_r <= buf_data_ns;
         buf_gecerli_r <= buf_gecerli_ns;
         durum_r <= durum_ns;
     end
@@ -206,6 +205,5 @@ assign ct_veri_o = ct_veri_r;
 assign ct_row_o = ct_row_r;
 assign ct_col_o = ct_col_r;
 assign ct_gecerli_o = ct_gecerli_r;
-assign ct_blok_son_o = ct_blok_son_r;
 
 endmodule

@@ -15,6 +15,7 @@
 
 `define RUN_BIT             4
 `define CAT_BIT             4
+`define HDATA_BIT           10
 
 `define PIXEL_BIT           8
 
