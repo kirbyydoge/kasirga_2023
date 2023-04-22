@@ -16,7 +16,7 @@ reg [2:0] gorev_i;
 reg stal_i;
 wire etkin_o;
 wire [23:0] pixel_o;
-
+wire stal_o;
 always begin
     clk_i = 1'b0;
     #5;
@@ -34,12 +34,13 @@ gorev_birimi ss (
     .stal_i(stal_i),
     .gorev_i(gorev_i),
     .etkin_o(etkin_o),
-    .pixel_o(pixel_o)
+    .pixel_o(pixel_o),
+    .stal_o(stal_o)
 );
 
 
 reg [7:0] img_mem [0:320*240-1];
-reg [23:0] res_mem [0:320*240-1];
+reg [7:0] res_mem [0:320*240-1];
 
 
 
@@ -48,7 +49,7 @@ always @(posedge clk_i) begin
     if (!rstn_i) begin
         res_ctr <= 0;
     end
-    else if (etkin_o && !stal_i) begin
+    else if (etkin_o && !stal_i ) begin
         res_mem[res_ctr] <= pixel_o;
         res_ctr <= res_ctr + 1;
     end
@@ -87,9 +88,9 @@ initial begin
             end
         end
         etkin_i=0;
-        wait(res_ctr == 256);
+        wait(res_ctr == 256*3);
         @(posedge clk_i);
-        for (i = 0; i < 256; i = i + 1) begin
+        for (i = 0; i < 256*3; i = i + 1) begin
             $fwrite(f,"%0h\n", res_mem[i]);
         end
         $fclose(f);
@@ -115,7 +116,7 @@ initial begin
             for(j=0;j<320;j=j+1) begin
                 pixel_i= img_mem[i * 320 + j];
                 @(posedge clk_i); #2;
-                if(j%2==1) begin
+                if(j%2==0) begin
                     stal_i=1;
                     @(posedge clk_i); #2;
                     stal_i=0;
@@ -146,7 +147,7 @@ initial begin
             for(j=0;j<320;j=j+1) begin
                 pixel_i= img_mem[i * 320 + j];
                 @(posedge clk_i); #2;
-                if(j%2==1) begin
+                if(j%2==0) begin
                     stal_i=1;
                     @(posedge clk_i); #2;
                     stal_i=0;

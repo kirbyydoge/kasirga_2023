@@ -160,6 +160,7 @@ always@* begin
                 sram_kontrol_ns=bekle;
                 rd_adres_ns = 0;
             end
+            
             if(rd_adres == 257) begin
                 he_etkin_ns = `LOW;
                 rd_adres_ns = rd_adres +1;;
@@ -170,7 +171,7 @@ always@* begin
                 he_etkin_ns = `HIGH;
                 rd_adres_ns = rd_adres+1;
                 he_cdf_ns = valid_r[rd_adres-1] ? (he_cdf + data_out_w) : he_cdf;
-                rd_en_cmb = `HIGH;
+                //rd_en_cmb = `HIGH;
                 //hazir_r_ns = {hazir_r[0],1'b1};
             end
             if(rd_adres > 0 && rd_adres < 256) begin
