@@ -68,6 +68,7 @@ reg laplacian_cmb1;
 reg[10:0] laplacian_pixel_cmb1;
 wire[10:0] laplacian_pixel_w1;
 reg gr2bw_erosion_cmb1;
+wire[71:0] medyan_w1;
 reg tasma_cmb1;
 
 evrisim_birimi eb1 (
@@ -84,6 +85,7 @@ evrisim_birimi eb1 (
     .laplacian_pixel_o(laplacian_pixel_w1),
     .gr2bw_erosion_i(gr2bw_erosion_cmb1),
     .tasma_i(tasma_cmb1),
+    .medyan_o(medyan_w1),
     .veri_etkin_o(veri_etkin_w1),
     .veri_o(veri_w1)
 );
@@ -99,6 +101,7 @@ reg laplacian_cmb2;
 reg[10:0] laplacian_pixel_cmb2;
 wire[10:0] laplacian_pixel_w2;
 reg gr2bw_erosion_cmb2;
+wire[71:0] medyan_w2;
 reg tasma_cmb2;
 
 evrisim_birimi eb2 (
@@ -114,6 +117,7 @@ evrisim_birimi eb2 (
     .laplacian_pixel_i(laplacian_pixel_cmb2),
     .laplacian_pixel_o(laplacian_pixel_w2),
     .gr2bw_erosion_i(gr2bw_erosion_cmb2),
+    .medyan_o(medyan_w2),
     .tasma_i(tasma_cmb2),
     .veri_etkin_o(veri_etkin_w2),
     .veri_o(veri_w2)
@@ -135,6 +139,18 @@ medyan_top mdyn (
 );
 
 reg[1:0] h_sayac,h_sayac_ns;
+
+reg etkin_h_cmb;
+reg[7:0] pixel_h_cmb;
+wire wr_en_h_w;
+wire[7:0] addr_w_h_w;
+wire[16:0] data_in_h_w;
+wire rd_en_h_w;
+wire[7:0] addr_r_h_w;
+reg [16:0] data_out_h_cmb;
+wire[23:0] pixel_h_w;
+wire    hazir_h_w;
+
 histogram_top ht (
     .clk_i(clk_i),
     .rstn_i(rstn_i),
@@ -150,23 +166,14 @@ histogram_top ht (
     .data_out_s_i(data_out_h_cmb),
     .hazir_o(hazir_h_w)
 );
-reg etkin_h_cmb;
-reg[7:0] pixel_h_cmb;
-wire wr_en_h_w;
-wire[7:0] addr_w_h_w;
-wire[16:0] data_in_h_w;
-wire rd_en_h_w;
-wire[7:0] addr_r_h_w;
-reg [16:0] data_out_h_cmb;
-wire[23:0] pixel_h_w;
-wire    hazir_h_w;
+
 
 reg wr_en_s_cmb;
 reg[7:0] addr_w_s_cmb;
 reg[16:0] data_in_s_cmb;
 reg rd_en_s_cmb;
 reg[7:0] addr_r_s_cmb;
-wire[17:0] data_out_s_w;
+wire[16:0] data_out_s_w;
 
 sram_histogram memory (
     .clk0 (clk_i),
@@ -210,7 +217,9 @@ always@* begin
     gr2bw_erosion_cmb0 = 0;
     gr2bw_erosion_cmb1 = 0;
     gr2bw_erosion_cmb2 = 0;
+    laplacian_pixel_cmb0 = 0;
     laplacian_pixel_cmb1 = 0;
+    laplacian_pixel_cmb2 = 0;
     etkin_cmb = 0;
     pixel_cmb = 0;
     etkin_m_cmb = 0;
@@ -227,6 +236,9 @@ always@* begin
     addr_r_s_cmb = 0;
     h_sayac_ns = h_sayac ==2 ? 0 : h_sayac + 1;
     stal_cmb =0;
+    tasma_cmb0=0;
+    tasma_cmb1=0;
+    tasma_cmb2=0;
 
     if(basla) begin
         case(gorev_i)

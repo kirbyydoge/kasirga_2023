@@ -3,7 +3,7 @@
 
 module tb_gorev_birimi();
 
-localparam GRV = `GRV5_HE;
+localparam GRV = `GRV3_M;
 localparam PATH_TO_IMG = "D:/Teknofest_2023/kasirga-goruntu-2023/verify/cevrilmis.txt";
 localparam PATH_TO_RES = "D:/Teknofest_2023/kasirga-goruntu-2023/verify/sonuc.txt";
 
@@ -15,7 +15,7 @@ reg [7:0] pixel_i;
 reg [2:0] gorev_i;
 reg stal_i;
 wire etkin_o;
-wire [23:0] pixel_o;
+wire [7:0] pixel_o;
 wire stal_o;
 always begin
     clk_i = 1'b0;
@@ -147,7 +147,7 @@ initial begin
             for(j=0;j<320;j=j+1) begin
                 pixel_i= img_mem[i * 320 + j];
                 @(posedge clk_i); #2;
-                if(j%2==0) begin
+                if(j%2==1) begin
                     stal_i=1;
                     @(posedge clk_i); #2;
                     stal_i=0;

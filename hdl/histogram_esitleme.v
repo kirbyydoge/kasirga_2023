@@ -11,7 +11,6 @@ module histogram_esitleme #(
     input                       etkin_i,
     input                       stal_i,
     input        [16:0]         cdf_min_i,
-    input        [7:0]          pixel_i,
     input        [16:0]         cdf_i,
     output       [7:0]          sonuc_o,
     output                      hazir_o
@@ -71,13 +70,15 @@ always@* begin
         say2_ns[0] = cikarma_r2<<17;
     end
 
-    for(i=0;i<18;i=i+1) begin
+    for(i=0;i<17;i=i+1) begin
         if(say1[i]>=say2[i]) begin
             bolum_ns[i+1]={bolum[i][16:0],1'b1};
+            bolum_ns[18]={bolum[17][16:0],1'b1};
             say1_ns[i+1]=say1[i]-say2[i]; 
             say2_ns[i+1]=  say2[i] >> 1 ;
         end else begin
             bolum_ns[i+1]={bolum[i][16:0],1'b0};
+            bolum_ns[18]={bolum[17][16:0],1'b0};
             say1_ns[i+1]=say1[i];
             say2_ns[i+1]= say2[i] >> 1;
         end        
