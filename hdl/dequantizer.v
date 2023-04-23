@@ -6,7 +6,7 @@ module dequantizer (
     input                       clk_i,
     input                       rstn_i,
 
-    input   [`PIXEL_BIT-1:0]    zig_veri_i,
+    input   [`HDATA_BIT-1:0]    zig_veri_i,
     input   [`BLOCK_BIT-1:0]    zig_veri_row_i,
     input   [`BLOCK_BIT-1:0]    zig_veri_col_i,
     input                       zig_veri_gecerli_i,

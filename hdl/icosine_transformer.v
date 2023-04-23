@@ -306,7 +306,7 @@ idctii idct (
 );
 
 assign dq_hazir_o = dq_hazir_cmb;
-assign gd_veri_o = gd_veri_cmb;
+assign gd_veri_o = gd_veri_cmb < 127 ? gd_veri_cmb + 8'd128 : 8'd255;
 assign gd_row_o = gd_row_cmb;
 assign gd_col_o = gd_col_cmb;
 assign gd_gecerli_o = gd_gecerli_cmb;
