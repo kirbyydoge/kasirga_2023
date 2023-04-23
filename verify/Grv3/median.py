@@ -19,8 +19,9 @@ filtered_img = medfilt2d(img, kernel_size=3)
 # Sonucu görselleştirme
 im = Image.fromarray(filtered_img.astype(np.uint8))
 im.show()
-
+im.save("../images_islenmis/salt_paper_grv3.jpg")
 # Sonucu dosyaya yazma
 with open('../salt_pepper_noise.txt', 'w') as f:
     for row in filtered_img[1:-1,1:-1].flatten():
         f.write(str(row) + '\n')
+

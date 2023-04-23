@@ -17,6 +17,7 @@ module zigzag_normalizer (
     output  [`BLOCK_BIT-1:0]    ct_row_o,
     output  [`BLOCK_BIT-1:0]    ct_col_o,
     output                      ct_gecerli_o,
+    output                      ct_blok_son_o,
     input                       ct_hazir_i
 );
 
@@ -36,6 +37,9 @@ reg [`BLOCK_BIT-1:0] ct_col_ns;
 
 reg                  ct_gecerli_r;
 reg                  ct_gecerli_ns;
+
+reg                  ct_blok_son_r;
+reg                  ct_blok_son_ns;
 
 reg [`RUN_BIT-1:0]   buf_run_r;
 reg [`RUN_BIT-1:0]   buf_run_ns;
@@ -132,6 +136,7 @@ always @* begin
     ct_row_ns = ct_row_r;
     ct_col_ns = ct_col_r;
     ct_gecerli_ns = ct_gecerli_r;
+    ct_blok_son_ns = ct_blok_son_r;
     buf_run_ns = buf_run_r;
     buf_data_ns = buf_data_r;
     durum_ns = durum_r;
@@ -140,10 +145,14 @@ always @* begin
 
     if (blok_son_i) begin
         ptr_block_ns = 0;
+        ct_blok_son_ns = 1;//{ct_blok_son_r[0],1'b1};
+    end else begin
+        ct_blok_son_ns = 0;// {ct_blok_son_r[0],1'b0};
     end
 
     if (ct_gecerli_o && ct_hazir_i) begin
         ct_gecerli_ns = `LOW;
+        //ct_blok_son_ns = `LOW;
     end
 
     if (buf_gecerli_r && !(ct_gecerli_o && !ct_hazir_i)) begin
@@ -183,6 +192,7 @@ always @(posedge clk_i) begin
         ct_row_r <= 0;
         ct_col_r <= 0;
         ct_gecerli_r <= 0;
+        ct_blok_son_r <= 0;
         buf_run_r <= 0;
         buf_gecerli_r <= 0;
         durum_r <= HAZIR;
@@ -193,6 +203,7 @@ always @(posedge clk_i) begin
         ct_row_r <= ct_row_ns;
         ct_col_r <= ct_col_ns;
         ct_gecerli_r <= ct_gecerli_ns;
+        ct_blok_son_r <= ct_blok_son_ns;
         buf_run_r <= buf_run_ns;
         buf_data_r <= buf_data_ns;
         buf_gecerli_r <= buf_gecerli_ns;
@@ -205,5 +216,6 @@ assign ct_veri_o = ct_veri_r;
 assign ct_row_o = ct_row_r;
 assign ct_col_o = ct_col_r;
 assign ct_gecerli_o = ct_gecerli_r;
+assign ct_blok_son_o = ct_blok_son_r;
 
 endmodule

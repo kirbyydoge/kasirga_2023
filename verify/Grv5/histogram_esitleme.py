@@ -52,3 +52,4 @@ img.putdata(pixel_values)
 
 # Görüntüyü göster
 img.show()
+img.save("../images_islenmis/histogram_equalization_grv5.jpg")

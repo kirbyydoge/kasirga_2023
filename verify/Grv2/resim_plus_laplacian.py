@@ -28,3 +28,4 @@ from PIL import Image
 img = Image.new('L', (320, 240))
 img.putdata(new_pixels)
 img.show()
+img.save("../images_islenmis/edge_enhancement_grv2.jpg")

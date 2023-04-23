@@ -10,12 +10,14 @@ module dequantizer (
     input   [`BLOCK_BIT-1:0]    zig_veri_row_i,
     input   [`BLOCK_BIT-1:0]    zig_veri_col_i,
     input                       zig_veri_gecerli_i,
+    input                       zig_blok_son_i,
     output                      zig_veri_hazir_o,
 
     output  [`Q_BIT-1:0]        idct_veri_o,
     output  [`BLOCK_BIT-1:0]    idct_veri_row_o,
     output  [`BLOCK_BIT-1:0]    idct_veri_col_o,
     output                      idct_veri_gecerli_o,
+    output                      idct_blok_son_o,
     input                       idct_veri_hazir_i
 );
 
@@ -34,6 +36,9 @@ reg  [`BLOCK_BIT-1:0]    veri_col_ns;
 
 reg                      veri_gecerli_r;
 reg                      veri_gecerli_ns;
+
+reg                      blok_son_r;
+reg                      blok_son_ns;
 
 task quantize_init();
 begin
@@ -111,7 +116,14 @@ always @* begin
     veri_row_ns = veri_row_r;
     veri_col_ns = veri_col_r;
     veri_gecerli_ns = veri_gecerli_r;
+    blok_son_ns = blok_son_r;
     
+    if(zig_blok_son_i) begin
+        blok_son_ns = 1;
+    end else begin
+        blok_son_ns = 0;
+    end
+
     if (idct_veri_gecerli_o && idct_veri_hazir_i) begin
         veri_gecerli_ns = `LOW;
     end
@@ -133,20 +145,24 @@ always @(posedge clk_i) begin
         veri_row_r <= 0;
         veri_col_r <= 0;
         veri_gecerli_r <= 0;
+        blok_son_r <= 0;
+        quantize_init();
+
     end
     else begin
-        veri_hazir_r <= veri_hazir_ns;
         veri_r <= veri_ns;
         veri_row_r <= veri_row_ns;
         veri_col_r <= veri_col_ns;
         veri_gecerli_r <= veri_gecerli_ns;
+        blok_son_r <= blok_son_ns;
     end
 end
 
-assign idct_veri_hazir_o = veri_hazir_cmb;
+assign zig_veri_hazir_o = veri_hazir_cmb;
 assign idct_veri_o = veri_r;
 assign idct_veri_row_o = veri_row_r;
 assign idct_veri_col_o = veri_col_r;
 assign idct_veri_gecerli_o = veri_gecerli_r;
+assign idct_blok_son_o = blok_son_ns;
 
 endmodule

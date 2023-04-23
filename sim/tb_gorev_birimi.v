@@ -17,6 +17,7 @@ reg stal_i;
 wire etkin_o;
 wire [7:0] pixel_o;
 wire stal_o;
+
 always begin
     clk_i = 1'b0;
     #5;

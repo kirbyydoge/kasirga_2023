@@ -54,4 +54,5 @@ filtered_img.show()
 # Orjinal pixelleri görüntü olarak göster
 img = Image.fromarray(img.astype(np.uint8))
 img.show()
+filtered_img.save("../images_islenmis/edge_detection_grv1.jpg")
 
