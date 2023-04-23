@@ -40,75 +40,76 @@ reg                      veri_gecerli_ns;
 reg                      blok_son_r;
 reg                      blok_son_ns;
 
+reg [`BLOCK_AREA_BIT-1:0] index_cmb;
+
 task quantize_init();
 begin
-    rom_nicem_tablosu_r['d0]   <= 8'd16;
-    rom_nicem_tablosu_r['d1]   <= 8'd11;
-    rom_nicem_tablosu_r['d2]   <= 8'd10;
-    rom_nicem_tablosu_r['d3]   <= 8'd16;
-    rom_nicem_tablosu_r['d4]   <= 8'd24;
-    rom_nicem_tablosu_r['d5]   <= 8'd40;
-    rom_nicem_tablosu_r['d6]   <= 8'd51;
-    rom_nicem_tablosu_r['d7]   <= 8'd61;
-    rom_nicem_tablosu_r['d8]   <= 8'd12;
-    rom_nicem_tablosu_r['d9]   <= 8'd12;
-    rom_nicem_tablosu_r['d10]  <= 8'd14; 
-    rom_nicem_tablosu_r['d11]  <= 8'd19;
-    rom_nicem_tablosu_r['d12]  <= 8'd26;
-    rom_nicem_tablosu_r['d13]  <= 8'd58;
-    rom_nicem_tablosu_r['d14]  <= 8'd60;
-    rom_nicem_tablosu_r['d15]  <= 8'd55;
-    rom_nicem_tablosu_r['d16]  <= 8'd14;
-    rom_nicem_tablosu_r['d17]  <= 8'd13;
-    rom_nicem_tablosu_r['d18]  <= 8'd16;
-    rom_nicem_tablosu_r['d19]  <= 8'd24;
-    rom_nicem_tablosu_r['d20]  <= 8'd40;
-    rom_nicem_tablosu_r['d21]  <= 8'd57;
-    rom_nicem_tablosu_r['d22]  <= 8'd69;
-    rom_nicem_tablosu_r['d23]  <= 8'd56;
-    rom_nicem_tablosu_r['d24]  <= 8'd14;
-    rom_nicem_tablosu_r['d25]  <= 8'd17;
-    rom_nicem_tablosu_r['d26]  <= 8'd22;
-    rom_nicem_tablosu_r['d27]  <= 8'd29;
-    rom_nicem_tablosu_r['d28]  <= 8'd51;
-    rom_nicem_tablosu_r['d29]  <= 8'd87;
-    rom_nicem_tablosu_r['d30]  <= 8'd80;
-    rom_nicem_tablosu_r['d31]  <= 8'd62;
-    rom_nicem_tablosu_r['d32]  <= 8'd18;
-    rom_nicem_tablosu_r['d33]  <= 8'd22;
-    rom_nicem_tablosu_r['d34]  <= 8'd37;
-    rom_nicem_tablosu_r['d35]  <= 8'd56;
-    rom_nicem_tablosu_r['d36]  <= 8'd68;
-    rom_nicem_tablosu_r['d37]  <= 8'd109;
-    rom_nicem_tablosu_r['d38]  <= 8'd103;
-    rom_nicem_tablosu_r['d39]  <= 8'd77;
-    rom_nicem_tablosu_r['d40]  <= 8'd24;
-    rom_nicem_tablosu_r['d41]  <= 8'd35;
-    rom_nicem_tablosu_r['d42]  <= 8'd55;
-    rom_nicem_tablosu_r['d43]  <= 8'd64;
-    rom_nicem_tablosu_r['d44]  <= 8'd81;
-    rom_nicem_tablosu_r['d45]  <= 8'd104;
-    rom_nicem_tablosu_r['d46]  <= 8'd113;
-    rom_nicem_tablosu_r['d47]  <= 8'd92;
-    rom_nicem_tablosu_r['d48]  <= 8'd49;
-    rom_nicem_tablosu_r['d49]  <= 8'd64;
-    rom_nicem_tablosu_r['d50]  <= 8'd78;
-    rom_nicem_tablosu_r['d51]  <= 8'd87;
-    rom_nicem_tablosu_r['d52]  <= 8'd103;
-    rom_nicem_tablosu_r['d53]  <= 8'd121;
-    rom_nicem_tablosu_r['d54]  <= 8'd120;
-    rom_nicem_tablosu_r['d55]  <= 8'd101;
-    rom_nicem_tablosu_r['d56]  <= 8'd72;
-    rom_nicem_tablosu_r['d57]  <= 8'd92;
-    rom_nicem_tablosu_r['d58]  <= 8'd95;
-    rom_nicem_tablosu_r['d59]  <= 8'd98;
-    rom_nicem_tablosu_r['d60]  <= 8'd112;
-    rom_nicem_tablosu_r['d61]  <= 8'd100;
-    rom_nicem_tablosu_r['d62]  <= 8'd103;
-    rom_nicem_tablosu_r['d63]  <= 8'd99;
+    rom_nicem_tablosu_r[6'd0]   <= 8'd16;
+    rom_nicem_tablosu_r[6'd1]   <= 8'd11;
+    rom_nicem_tablosu_r[6'd2]   <= 8'd10;
+    rom_nicem_tablosu_r[6'd3]   <= 8'd16;
+    rom_nicem_tablosu_r[6'd4]   <= 8'd24;
+    rom_nicem_tablosu_r[6'd5]   <= 8'd40;
+    rom_nicem_tablosu_r[6'd6]   <= 8'd51;
+    rom_nicem_tablosu_r[6'd7]   <= 8'd61;
+    rom_nicem_tablosu_r[6'd8]   <= 8'd12;
+    rom_nicem_tablosu_r[6'd9]   <= 8'd12;
+    rom_nicem_tablosu_r[6'd10]  <= 8'd14; 
+    rom_nicem_tablosu_r[6'd11]  <= 8'd19;
+    rom_nicem_tablosu_r[6'd12]  <= 8'd26;
+    rom_nicem_tablosu_r[6'd13]  <= 8'd58;
+    rom_nicem_tablosu_r[6'd14]  <= 8'd60;
+    rom_nicem_tablosu_r[6'd15]  <= 8'd55;
+    rom_nicem_tablosu_r[6'd16]  <= 8'd14;
+    rom_nicem_tablosu_r[6'd17]  <= 8'd13;
+    rom_nicem_tablosu_r[6'd18]  <= 8'd16;
+    rom_nicem_tablosu_r[6'd19]  <= 8'd24;
+    rom_nicem_tablosu_r[6'd20]  <= 8'd40;
+    rom_nicem_tablosu_r[6'd21]  <= 8'd57;
+    rom_nicem_tablosu_r[6'd22]  <= 8'd69;
+    rom_nicem_tablosu_r[6'd23]  <= 8'd56;
+    rom_nicem_tablosu_r[6'd24]  <= 8'd14;
+    rom_nicem_tablosu_r[6'd25]  <= 8'd17;
+    rom_nicem_tablosu_r[6'd26]  <= 8'd22;
+    rom_nicem_tablosu_r[6'd27]  <= 8'd29;
+    rom_nicem_tablosu_r[6'd28]  <= 8'd51;
+    rom_nicem_tablosu_r[6'd29]  <= 8'd87;
+    rom_nicem_tablosu_r[6'd30]  <= 8'd80;
+    rom_nicem_tablosu_r[6'd31]  <= 8'd62;
+    rom_nicem_tablosu_r[6'd32]  <= 8'd18;
+    rom_nicem_tablosu_r[6'd33]  <= 8'd22;
+    rom_nicem_tablosu_r[6'd34]  <= 8'd37;
+    rom_nicem_tablosu_r[6'd35]  <= 8'd56;
+    rom_nicem_tablosu_r[6'd36]  <= 8'd68;
+    rom_nicem_tablosu_r[6'd37]  <= 8'd109;
+    rom_nicem_tablosu_r[6'd38]  <= 8'd103;
+    rom_nicem_tablosu_r[6'd39]  <= 8'd77;
+    rom_nicem_tablosu_r[6'd40]  <= 8'd24;
+    rom_nicem_tablosu_r[6'd41]  <= 8'd35;
+    rom_nicem_tablosu_r[6'd42]  <= 8'd55;
+    rom_nicem_tablosu_r[6'd43]  <= 8'd64;
+    rom_nicem_tablosu_r[6'd44]  <= 8'd81;
+    rom_nicem_tablosu_r[6'd45]  <= 8'd104;
+    rom_nicem_tablosu_r[6'd46]  <= 8'd113;
+    rom_nicem_tablosu_r[6'd47]  <= 8'd92;
+    rom_nicem_tablosu_r[6'd48]  <= 8'd49;
+    rom_nicem_tablosu_r[6'd49]  <= 8'd64;
+    rom_nicem_tablosu_r[6'd50]  <= 8'd78;
+    rom_nicem_tablosu_r[6'd51]  <= 8'd87;
+    rom_nicem_tablosu_r[6'd52]  <= 8'd103;
+    rom_nicem_tablosu_r[6'd53]  <= 8'd121;
+    rom_nicem_tablosu_r[6'd54]  <= 8'd120;
+    rom_nicem_tablosu_r[6'd55]  <= 8'd101;
+    rom_nicem_tablosu_r[6'd56]  <= 8'd72;
+    rom_nicem_tablosu_r[6'd57]  <= 8'd92;
+    rom_nicem_tablosu_r[6'd58]  <= 8'd95;
+    rom_nicem_tablosu_r[6'd59]  <= 8'd98;
+    rom_nicem_tablosu_r[6'd60]  <= 8'd112;
+    rom_nicem_tablosu_r[6'd61]  <= 8'd100;
+    rom_nicem_tablosu_r[6'd62]  <= 8'd103;
+    rom_nicem_tablosu_r[6'd63]  <= 8'd99;
 end
 endtask
-
 
 always @* begin
     veri_hazir_cmb = !(idct_veri_gecerli_o && !idct_veri_hazir_i);
@@ -117,6 +118,7 @@ always @* begin
     veri_col_ns = veri_col_r;
     veri_gecerli_ns = veri_gecerli_r;
     blok_son_ns = blok_son_r;
+    index_cmb = (zig_veri_row_i << 3) + zig_veri_col_i;
     
     if(zig_blok_son_i) begin
         blok_son_ns = 1;
@@ -130,7 +132,7 @@ always @* begin
 
     if (zig_veri_gecerli_i && zig_veri_hazir_o) begin
         veri_ns = {`Q_BIT{1'b0}};
-        veri_ns[`Q_INT] = zig_veri_i * rom_nicem_tablosu_r[zig_veri_row_i << 3 + zig_veri_col_i];
+        veri_ns[`Q_INT] = $signed(zig_veri_i) * $signed(rom_nicem_tablosu_r[index_cmb]);
         veri_row_ns = zig_veri_row_i;
         veri_col_ns = zig_veri_col_i;
         veri_gecerli_ns = `HIGH;
@@ -147,7 +149,6 @@ always @(posedge clk_i) begin
         veri_gecerli_r <= 0;
         blok_son_r <= 0;
         quantize_init();
-
     end
     else begin
         veri_r <= veri_ns;

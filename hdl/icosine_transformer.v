@@ -212,7 +212,7 @@ always @* begin
     gd_col_cmb = get_col(ptr_gonder_r);
     gd_blok_son_cmb = `LOW;
 
-    if (ptr_gonder_r < ptr_idct_sonuc_r && ptr_idct_istek_r > IDCT_DELAY) begin
+    if (ptr_gonder_r < ptr_idct_sonuc_r && (ptr_idct_istek_r > IDCT_DELAY || ptr_idct_sonuc_r == 64)) begin
         gd_gecerli_cmb = `HIGH;
         gd_blok_son_cmb = ptr_gonder_r == 63;
     end
@@ -238,11 +238,9 @@ always @* begin
     DURUM_DOLDUR: begin
         dq_hazir_cmb = `HIGH;
         if (dq_gecerli_i && dq_hazir_o) begin
+            buf_blok_ns[index(dq_row_i, dq_col_i)] = dq_veri_i;
             if (dq_blok_son_i) begin
                 durum_ns = DURUM_CARP;
-            end
-            else begin
-                buf_blok_ns[index(dq_row_i, dq_col_i)] = dq_veri_i;
             end
         end
     end
