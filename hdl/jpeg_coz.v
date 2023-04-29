@@ -6,7 +6,7 @@ module jpeg_coz (
     input                       clk_i,
     input                       rstn_i,
 
-    input   [`WB_BIT-1:0]       m_veri_i,
+    input   [7:0]               m_veri_i,
     input                       m_gecerli_i,
     output                      m_hazir_o,
 
@@ -15,64 +15,27 @@ module jpeg_coz (
     input                       coz_hazir_i
 );
 
-wire [`RUN_BIT-1:0]   hd_nd_run_w;
-wire [`CAT_BIT-1:0]   hd_nd_cat_w;
-wire                  hd_nd_gecerli_w;
 
-huffman_decoder hd (
-    .clk_i        ( clk_i ),
-    .rstn_i       ( rstn_i ),
-    .m_veri_i     ( m_veri_i ),
-    .m_gecerli_i  ( m_gecerli_i ),
-    .m_hazir_o    ( m_hazir_o ),
-    .nd_run_o     ( hd_nd_run_w ),
-    .nd_cat_o     ( hd_nd_cat_w ),
-    .nd_gecerli_o ( hd_nd_gecerli_w ),
-    .nd_hazir_i   ( zn_hd_hazir_w )
-);
 
-wire                      zn_hd_hazir_w;
-wire  [`PIXEL_BIT-1:0]    zn_ct_veri_w;
-wire  [`BLOCK_BIT-1:0]    zn_ct_row_w;
-wire  [`BLOCK_BIT-1:0]    zn_ct_col_w;
-wire                      zn_ct_gecerli_w;
-wire                      zn_ct_blok_son_w;
+wire    [`RUN_BIT-1:0]    nd_run_o;
+wire    [`HDATA_BIT-1:0]  nd_data_o;
+wire                      nd_gecerli_o;
+wire                      nd_hazir_i;
+wire                      nd_blk_son_o;
 
-zigzag_normalizer zn (
-    .clk_i         ( clk_i ),
-    .rstn_i        ( rstn_i ),
-    .hd_run_i      ( hd_nd_run_w ),
-    .hd_cat_i      ( hd_nd_cat_w ),
-    .hd_gecerli_i  ( hd_nd_gecerli_w ),
-    .hd_hazir_o    ( zn_hd_hazir_w ),
-    .ct_veri_o     ( zn_ct_veri_w ),
-    .ct_row_o      ( zn_ct_row_w ),
-    .ct_col_o      ( zn_ct_col_w ),
-    .ct_gecerli_o  ( zn_ct_gecerli_w ),
-    .ct_blok_son_o ( zn_ct_blok_son_w ),
-    .ct_hazir_i    ( dq_zig_veri_hazir_w )
-);
+wire  [`HDATA_BIT-1:0]    ct_veri_o;
+wire  [`BLOCK_BIT-1:0]    ct_row_o;
+wire  [`BLOCK_BIT-1:0]    ct_col_o;
+wire                      ct_gecerli_o;
+wire                      ct_hazir_i = 1;
+wire                      ct_blok_son_o;
 
 wire                      dq_zig_veri_hazir_w;
 wire  [`Q_BIT-1:0]        dq_idct_veri_w;
 wire  [`BLOCK_BIT-1:0]    dq_idct_veri_row_w;
 wire  [`BLOCK_BIT-1:0]    dq_idct_veri_col_w;
 wire                      dq_idct_veri_gecerli_w;
-
-dequantizer dq (
-    .clk_i               ( clk_i ),
-    .rstn_i              ( rstn_i ),
-    .zig_veri_i          ( zn_ct_veri_w ),
-    .zig_veri_row_i      ( zn_ct_row_w ),
-    .zig_veri_col_i      ( zn_ct_col_w ),
-    .zig_veri_gecerli_i  ( zn_ct_gecerli_w ),
-    .zig_veri_hazir_o    ( dq_zig_veri_hazir_w ),
-    .idct_veri_o         ( dq_idct_veri_w ),
-    .idct_veri_row_o     ( dq_idct_veri_row_w ),
-    .idct_veri_col_o     ( dq_idct_veri_col_w ),
-    .idct_veri_gecerli_o ( dq_idct_veri_gecerli_w ),
-    .idct_veri_hazir_i   ( ict_dq_hazir_w )
-);
+wire                      dq_idct_blok_son_w;
 
 wire                      ict_dq_hazir_w;
 wire  [`PIXEL_BIT-1:0]    ict_gd_veri_w;
@@ -81,6 +44,55 @@ wire  [`BLOCK_BIT-1:0]    ict_gd_col_w;
 wire                      ict_gd_gecerli_w;
 wire                      ict_gd_blok_son_w;
 
+wire                      idct_hazir_w;
+
+
+huffman_decoder uut (
+    .clk_i         ( clk_i ),
+    .rstn_i        ( rstn_i ),
+    .m_veri_i      ( m_veri_i ),
+    .m_gecerli_i   ( m_gecerli_i ),
+    .m_hazir_o     ( m_hazir_o ),
+    .nd_run_o      ( nd_run_o ),
+    .nd_data_o     ( nd_data_o ),
+    .nd_gecerli_o  ( nd_gecerli_o ),
+    .nd_hazir_i    ( nd_hazir_i ),
+    .nd_blk_son_o  ( nd_blk_son_o )
+);
+
+zigzag_normalizer zn (
+    .clk_i         ( clk_i ),
+    .rstn_i        ( rstn_i ),
+    .hd_run_i      ( nd_run_o ),
+    .hd_veri_i     ( nd_data_o ),
+    .hd_gecerli_i  ( nd_gecerli_o ),
+    .hd_son_i      ( nd_blk_son_o ),
+    .hd_hazir_o    ( nd_hazir_i ),
+    .ct_veri_o     ( ct_veri_o ),
+    .ct_row_o      ( ct_row_o ),
+    .ct_col_o      ( ct_col_o ),
+    .ct_gecerli_o  ( ct_gecerli_o ),
+    .ct_blok_son_o ( ct_blok_son_o ),
+    .ct_hazir_i    ( dq_zig_veri_hazir_w )
+);
+
+dequantizer dq (
+    .clk_i               ( clk_i ),
+    .rstn_i              ( rstn_i ),
+    .zig_veri_i          ( ct_veri_o ),
+    .zig_veri_row_i      ( ct_row_o ),
+    .zig_veri_col_i      ( ct_col_o ),
+    .zig_veri_gecerli_i  ( ct_gecerli_o ),
+    .zig_blok_son_i      ( ct_blok_son_o ),
+    .zig_veri_hazir_o    ( dq_zig_veri_hazir_w ),
+    .idct_veri_o         ( dq_idct_veri_w ),
+    .idct_veri_row_o     ( dq_idct_veri_row_w ),
+    .idct_veri_col_o     ( dq_idct_veri_col_w ),
+    .idct_veri_gecerli_o ( dq_idct_veri_gecerli_w ),
+    .idct_blok_son_o     ( dq_idct_blok_son_w ),
+    .idct_veri_hazir_i   ( ict_dq_hazir_w )
+);
+
 icosine_transformer ict (
     .clk_i          ( clk_i ),
     .rstn_i         ( rstn_i ),
@@ -88,7 +100,7 @@ icosine_transformer ict (
     .dq_row_i       ( dq_idct_veri_row_w ),
     .dq_col_i       ( dq_idct_veri_col_w ),
     .dq_gecerli_i   ( dq_idct_veri_gecerli_w ),
-    .dq_blok_son_i  ( 1'b0 ),
+    .dq_blok_son_i  ( dq_idct_blok_son_w ),
     .dq_hazir_o     ( ict_dq_hazir_w ),
     .gd_veri_o      ( ict_gd_veri_w ),
     .gd_row_o       ( ict_gd_row_w ),
@@ -97,8 +109,6 @@ icosine_transformer ict (
     .gd_blok_son_o  ( ict_gd_blok_son_w ),
     .gd_hazir_i     ( idct_hazir_w )
 );
-
-wire idct_hazir_w;
 
 decode_normalizer denorm (
     .clk_i           ( clk_i ),

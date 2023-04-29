@@ -6,11 +6,10 @@ module zigzag_normalizer (
     input                       clk_i,
     input                       rstn_i,
 
-    input                       blok_son_i,
-
     input   [`RUN_BIT-1:0]      hd_run_i,
     input   [`HDATA_BIT-1:0]    hd_veri_i,
     input                       hd_gecerli_i,
+    input                       hd_son_i,
     output                      hd_hazir_o,
 
     output  [`HDATA_BIT-1:0]    ct_veri_o,
@@ -58,6 +57,9 @@ reg                  durum_ns;
 
 reg                  blk_flag_r;
 reg                  blk_flag_ns;
+
+reg                  buf_son_r;
+reg                  buf_son_ns;
 
 reg                  hd_hazir_cmb;
 
@@ -131,6 +133,7 @@ end
 endtask
 
 always @* begin
+    buf_son_ns = buf_son_r;
     ptr_block_ns = ptr_block_r;
     ct_veri_ns = ct_veri_r;
     ct_row_ns = ct_row_r;
@@ -143,16 +146,9 @@ always @* begin
     buf_gecerli_ns = buf_gecerli_r;
     hd_hazir_cmb = `HIGH;
 
-    if (blok_son_i) begin
-        ptr_block_ns = 0;
-        ct_blok_son_ns = 1;//{ct_blok_son_r[0],1'b1};
-    end else begin
-        ct_blok_son_ns = 0;// {ct_blok_son_r[0],1'b0};
-    end
-
     if (ct_gecerli_o && ct_hazir_i) begin
         ct_gecerli_ns = `LOW;
-        //ct_blok_son_ns = `LOW;
+        ct_blok_son_ns = `LOW;
     end
 
     if (buf_gecerli_r && !(ct_gecerli_o && !ct_hazir_i)) begin
@@ -160,7 +156,11 @@ always @* begin
         ct_col_ns = rom_zigzag_order_r[ptr_block_r - 1] & 6'h7;  // mod 8
         ct_gecerli_ns = `HIGH;
         ct_veri_ns = buf_data_r;
+        ct_blok_son_ns = buf_son_r;
         buf_gecerli_ns = `LOW;
+        if (buf_son_r) begin
+            ptr_block_ns = 0;
+        end
     end
 
     case(durum_r)
@@ -168,6 +168,7 @@ always @* begin
         if (hd_hazir_o && hd_gecerli_i) begin
             buf_run_ns = hd_run_i;
             buf_data_ns = hd_veri_i;
+            buf_son_ns = hd_son_i;
             buf_gecerli_ns = `HIGH;
             ptr_block_ns = ptr_block_r + hd_run_i + 1;
             if (ct_gecerli_o && !ct_hazir_i) begin
@@ -196,6 +197,7 @@ always @(posedge clk_i) begin
         buf_run_r <= 0;
         buf_gecerli_r <= 0;
         durum_r <= HAZIR;
+        buf_son_r <= 0;
     end
     else begin
         ptr_block_r <= ptr_block_ns;
@@ -208,6 +210,7 @@ always @(posedge clk_i) begin
         buf_data_r <= buf_data_ns;
         buf_gecerli_r <= buf_gecerli_ns;
         durum_r <= durum_ns;
+        buf_son_r <= buf_son_ns;
     end
 end
 

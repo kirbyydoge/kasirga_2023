@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from PIL import Image
 import random
+from fxpmath import Fxp
 
 Q_TABLE = np.array([
     [16,  11,  10,  16,  24,  40,  51,  61],
@@ -36,9 +37,10 @@ def rand_err(err):
 
 BITS = 0
 def quant(num, bits=BITS):
-    frac = num % 1.00
-    qfrac = float(round(frac / (1 / (2 ** bits)))) / (2 ** bits)
-    return  num - frac + qfrac
+    # frac = num % 1.00
+    # qfrac = float(round(frac / (1 / (2 ** bits)))) / (2 ** bits)
+    # return  num - frac + qfrac
+    return Fxp(num, True, 18, 3)
 
 def idct_single_err(img, row, col, m, n, err):
     M = 8
@@ -136,12 +138,15 @@ def dequantize_block(dest, src, q_table, row, col):
             pixel_x = 8 * col + j
             dest[pixel_y][pixel_x] = src[pixel_y][pixel_x] * q_table[i][j]
 
-"""f = plt.figure()
+f = plt.figure()
+
+orig = np.array(Image.open('mario.jpg').convert('L'))
 
 dct_img = dct_full(orig)
 q_img = quantize_full(dct_img, Q_TABLE)
 dq_img = dequantize_full(q_img, Q_TABLE)
-idct_img = idct_full(dq_img)
+# idct_img = idct_full(dq_img)
+print("Idct ERR")
 q3_img = idct_full_err(dq_img, 3)
 
 ax = f.add_subplot(1, 2, 1)
@@ -154,4 +159,4 @@ plt.tick_params(left = False, bottom = False, labelleft = False, labelbottom = F
 plt.imshow(q3_img, cmap='gray', vmin = 0, vmax = 255)
 ax.set_title("Q15.3 IDCT Sonucu")
 
-plt.show(block=True)"""
+plt.show(block=True)

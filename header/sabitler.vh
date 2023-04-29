@@ -1,7 +1,7 @@
 `define FPGA
 //`define CARAVEL
 
-`define CLK_HZ              100_000_000
+`define CLK_HZ              25_000_000
 `define BAUD_RATE           9600
 
 `define HIGH                1'b1
@@ -50,7 +50,7 @@
 
 // Inverse Cosine-II Transformer
 `define Q_INT_BIT           15
-`define Q_FRAC_BIT          3
+`define Q_FRAC_BIT          16
 `define Q_BIT               (`Q_INT_BIT + `Q_FRAC_BIT)
 `define Q_INT               `Q_FRAC_BIT +: `Q_INT_BIT
 `define Q_FRAC              0 +: `Q_FRAC_BIT

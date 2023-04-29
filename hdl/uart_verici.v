@@ -12,8 +12,7 @@ module uart_verici (
    input [7:0]             gelen_veri_i,
    input [15:0]            baud_div_i,
    
-   output                  tx_o,
-   output                  hazir_o
+   output                  tx_o
 );
 
 localparam BOSTA = 0;
@@ -34,14 +33,12 @@ reg [7:0] veri_r;
 reg [7:0] veri_ns;
 
 reg tx_cmb;
-reg hazir_cmb;
 reg saat_aktif_cmb;
 
 reg consume_cmb;
 
 always @* begin
    tx_cmb = `HIGH;
-   hazir_cmb = `LOW;
    saat_aktif_cmb = `LOW;
    durum_ns = durum_r;
    sayac_ns = sayac_r;
@@ -59,7 +56,7 @@ always @* begin
 
    case (durum_r) 
       BOSTA: begin
-         if (tx_en_i && veri_gecerli_i) begin
+         if (veri_gecerli_i) begin
             consume_cmb = `HIGH;
             tx_cmb = `LOW;
             durum_ns = BASLA;
@@ -87,7 +84,6 @@ always @* begin
          tx_cmb = `HIGH;
          if (saat_aktif_cmb) begin
             durum_ns = BOSTA;
-            hazir_cmb = `HIGH;
          end     
       end
    endcase
@@ -109,7 +105,6 @@ always @ (posedge clk_i) begin
 end
 
 assign tx_o = tx_cmb;
-assign hazir_o = hazir_cmb;
 assign consume_o = consume_cmb;
 
 endmodule

@@ -119,12 +119,6 @@ always @* begin
     veri_gecerli_ns = veri_gecerli_r;
     blok_son_ns = blok_son_r;
     index_cmb = (zig_veri_row_i << 3) + zig_veri_col_i;
-    
-    if(zig_blok_son_i) begin
-        blok_son_ns = 1;
-    end else begin
-        blok_son_ns = 0;
-    end
 
     if (idct_veri_gecerli_o && idct_veri_hazir_i) begin
         veri_gecerli_ns = `LOW;
@@ -135,6 +129,7 @@ always @* begin
         veri_ns[`Q_INT] = $signed(zig_veri_i) * $signed(rom_nicem_tablosu_r[index_cmb]);
         veri_row_ns = zig_veri_row_i;
         veri_col_ns = zig_veri_col_i;
+        blok_son_ns = zig_blok_son_i;
         veri_gecerli_ns = `HIGH;
     end
 
@@ -164,6 +159,6 @@ assign idct_veri_o = veri_r;
 assign idct_veri_row_o = veri_row_r;
 assign idct_veri_col_o = veri_col_r;
 assign idct_veri_gecerli_o = veri_gecerli_r;
-assign idct_blok_son_o = blok_son_ns;
+assign idct_blok_son_o = blok_son_r;
 
 endmodule

@@ -214,6 +214,17 @@ always @(posedge clk_i) begin
     end
 end
 
+integer dbg_ctr;
+
+always @(posedge clk_i) begin
+    if (!rstn_i) begin
+        dbg_ctr <= 0;
+    end
+    else if (dn_gecerli_o && dn_hazir_i) begin
+        dbg_ctr <= dbg_ctr + 1;
+    end
+end
+
 assign idct_hazir_o = idct_hazir_cmb;
 assign dn_veri_o = dn_veri_cmb;
 assign dn_gecerli_o = dn_gecerli_cmb;

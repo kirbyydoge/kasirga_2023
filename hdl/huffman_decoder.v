@@ -46,6 +46,7 @@ reg                         buf_bos_ns;
 
 reg                         m_hazir_r;
 reg                         m_hazir_ns;
+reg                         m_hazir_cmb;
 
 reg [`RUN_BIT-1:0]          nd_run_r;
 reg [`RUN_BIT-1:0]          nd_run_ns;
@@ -925,7 +926,7 @@ always @* begin
         end
     end 
     DURUM_VERI_GONDER: begin
-        if (nd_gecerli_o && nd_hazir_i) begin
+        if (!(buf_send_valid_r && !nd_hazir_i)) begin
             hd_durum_ns = DURUM_AC_COZ;
             nd_gecerli_ns = `LOW; 
         end
@@ -991,7 +992,9 @@ always @* begin
     end
     endcase
 
-    m_hazir_ns = buf_bos_r || !(ptr_buf_oku_ns == ptr_buf_yaz_ns);
+    // m_hazir_ns = buf_bos_r || ptr_buf_oku_ns != ptr_buf_yaz_ns;
+    m_hazir_cmb = buf_bos_r || buf_veri_sayisi_w < 244;
+    buf_bos_ns = ptr_buf_oku_ns == ptr_buf_yaz_ns;
 end
 
 always @(posedge clk_i) begin
@@ -1037,12 +1040,47 @@ always @(posedge clk_i) begin
     end
 end
 
-assign buf_veri_sayisi_w = ptr_buf_yaz_r > ptr_buf_oku_r ? ptr_buf_yaz_r - ptr_buf_oku_r : ptr_buf_oku_r - ptr_buf_yaz_r;
+reg [`HDATA_BIT-1:0]    buf_hold_r;    
+reg [`RUN_BIT-1:0]      buf_hold_run_r;
+reg                     buf_hold_valid_r;
 
-assign m_hazir_o = m_hazir_r;
-assign nd_run_o = nd_run_r;
-assign nd_data_o = nd_data_r;
-assign nd_gecerli_o = nd_gecerli_r;
-assign nd_blk_son_o = nd_blk_son_cmb;
+reg [`HDATA_BIT-1:0]    buf_send_r;
+reg [`RUN_BIT-1:0]      buf_send_run_r;
+reg                     buf_send_valid_r;
+reg                     buf_send_last_r;
+
+always @(posedge clk_i) begin
+    if (!rstn_i) begin
+        buf_hold_r <= 0;
+        buf_hold_valid_r <= 0;
+        buf_send_r <= 0;
+        buf_send_valid_r <= 0;
+        buf_send_last_r <= 0;
+    end
+    else begin
+        if (nd_hazir_i) begin
+            buf_send_valid_r <= `LOW;
+            buf_send_last_r <= `LOW;
+        end
+         if ( (nd_gecerli_r && !( buf_send_valid_r && !nd_hazir_i)) || nd_blk_son_cmb ) begin
+            buf_hold_r <= nd_data_r;
+            buf_hold_run_r <= nd_run_r;
+            buf_hold_valid_r <= nd_gecerli_r;
+            buf_send_r <= buf_hold_r;
+            buf_send_run_r <= buf_hold_run_r;
+            buf_send_valid_r <= buf_hold_valid_r || nd_blk_son_cmb;
+            buf_send_last_r <= nd_blk_son_cmb;
+        end
+
+    end
+end
+
+assign buf_veri_sayisi_w = ptr_buf_yaz_r >= ptr_buf_oku_r ? ptr_buf_yaz_r - ptr_buf_oku_r : 255 - ptr_buf_oku_r + ptr_buf_yaz_r;
+
+assign m_hazir_o = m_hazir_cmb;
+assign nd_run_o = buf_send_run_r;
+assign nd_data_o = buf_send_r;
+assign nd_gecerli_o = buf_send_valid_r;
+assign nd_blk_son_o = buf_send_last_r;
 
 endmodule 

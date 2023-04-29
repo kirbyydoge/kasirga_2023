@@ -99,68 +99,68 @@ begin
     case(key)
     6'b000000: lookup_cosine = `IDCT_COS_VAL0;
     6'b000001: lookup_cosine = `IDCT_COS_VAL1;
-    6'b000010: lookup_cosine = `IDCT_COS_VAL1;
-    6'b000011: lookup_cosine = `IDCT_COS_VAL2;
-    6'b000100: lookup_cosine = `IDCT_COS_VAL3;
-    6'b000101: lookup_cosine = `IDCT_COS_VAL4;
-    6'b000110: lookup_cosine = `IDCT_COS_VAL5;
-    6'b000111: lookup_cosine = `IDCT_COS_VAL6;
+    6'b000010: lookup_cosine = `IDCT_COS_VAL2;
+    6'b000011: lookup_cosine = `IDCT_COS_VAL3;
+    6'b000100: lookup_cosine = `IDCT_COS_VAL4;
+    6'b000101: lookup_cosine = `IDCT_COS_VAL5;
+    6'b000110: lookup_cosine = `IDCT_COS_VAL6;
+    6'b000111: lookup_cosine = `IDCT_COS_VAL7;
     6'b001000: lookup_cosine = `IDCT_COS_VAL0;
-    6'b001001: lookup_cosine = `IDCT_COS_VAL2;
-    6'b001010: lookup_cosine = `IDCT_COS_VAL5;
-    6'b001011: lookup_cosine = `IDCT_COS_VAL7;
-    6'b001100: lookup_cosine = `IDCT_COS_VAL8;
-    6'b001101: lookup_cosine = `IDCT_COS_VAL9;
-    6'b001110: lookup_cosine = `IDCT_COS_VAL9;
-    6'b001111: lookup_cosine = `IDCT_COS_VAL10;
+    6'b001001: lookup_cosine = `IDCT_COS_VAL3;
+    6'b001010: lookup_cosine = `IDCT_COS_VAL6;
+    6'b001011: lookup_cosine = `IDCT_COS_VAL8;
+    6'b001100: lookup_cosine = `IDCT_COS_VAL9;
+    6'b001101: lookup_cosine = `IDCT_COS_VAL10;
+    6'b001110: lookup_cosine = `IDCT_COS_VAL11;
+    6'b001111: lookup_cosine = `IDCT_COS_VAL12;
     6'b010000: lookup_cosine = `IDCT_COS_VAL0;
-    6'b010001: lookup_cosine = `IDCT_COS_VAL4;
-    6'b010010: lookup_cosine = `IDCT_COS_VAL11;
-    6'b010011: lookup_cosine = `IDCT_COS_VAL9;
-    6'b010100: lookup_cosine = `IDCT_COS_VAL8;
-    6'b010101: lookup_cosine = `IDCT_COS_VAL6;
-    6'b010110: lookup_cosine = `IDCT_COS_VAL1;
-    6'b010111: lookup_cosine = `IDCT_COS_VAL2;
+    6'b010001: lookup_cosine = `IDCT_COS_VAL5;
+    6'b010010: lookup_cosine = `IDCT_COS_VAL13;
+    6'b010011: lookup_cosine = `IDCT_COS_VAL10;
+    6'b010100: lookup_cosine = `IDCT_COS_VAL9;
+    6'b010101: lookup_cosine = `IDCT_COS_VAL7;
+    6'b010110: lookup_cosine = `IDCT_COS_VAL2;
+    6'b010111: lookup_cosine = `IDCT_COS_VAL3;
     6'b011000: lookup_cosine = `IDCT_COS_VAL0;
-    6'b011001: lookup_cosine = `IDCT_COS_VAL6;
-    6'b011010: lookup_cosine = `IDCT_COS_VAL9;
-    6'b011011: lookup_cosine = `IDCT_COS_VAL10;
-    6'b011100: lookup_cosine = `IDCT_COS_VAL3;
-    6'b011101: lookup_cosine = `IDCT_COS_VAL2;
-    6'b011110: lookup_cosine = `IDCT_COS_VAL11;
-    6'b011111: lookup_cosine = `IDCT_COS_VAL9;
+    6'b011001: lookup_cosine = `IDCT_COS_VAL7;
+    6'b011010: lookup_cosine = `IDCT_COS_VAL11;
+    6'b011011: lookup_cosine = `IDCT_COS_VAL12;
+    6'b011100: lookup_cosine = `IDCT_COS_VAL4;
+    6'b011101: lookup_cosine = `IDCT_COS_VAL3;
+    6'b011110: lookup_cosine = `IDCT_COS_VAL13;
+    6'b011111: lookup_cosine = `IDCT_COS_VAL10;
     6'b100000: lookup_cosine = `IDCT_COS_VAL0;
-    6'b100001: lookup_cosine = `IDCT_COS_VAL7;
-    6'b100010: lookup_cosine = `IDCT_COS_VAL9;
-    6'b100011: lookup_cosine = `IDCT_COS_VAL4;
-    6'b100100: lookup_cosine = `IDCT_COS_VAL3;
-    6'b100101: lookup_cosine = `IDCT_COS_VAL12;
-    6'b100110: lookup_cosine = `IDCT_COS_VAL11;
+    6'b100001: lookup_cosine = `IDCT_COS_VAL8;
+    6'b100010: lookup_cosine = `IDCT_COS_VAL11;
+    6'b100011: lookup_cosine = `IDCT_COS_VAL5;
+    6'b100100: lookup_cosine = `IDCT_COS_VAL4;
+    6'b100101: lookup_cosine = `IDCT_COS_VAL14;
+    6'b100110: lookup_cosine = `IDCT_COS_VAL13;
     6'b100111: lookup_cosine = `IDCT_COS_VAL1;
     6'b101000: lookup_cosine = `IDCT_COS_VAL0;
-    6'b101001: lookup_cosine = `IDCT_COS_VAL10;
-    6'b101010: lookup_cosine = `IDCT_COS_VAL11;
+    6'b101001: lookup_cosine = `IDCT_COS_VAL12;
+    6'b101010: lookup_cosine = `IDCT_COS_VAL13;
     6'b101011: lookup_cosine = `IDCT_COS_VAL1;
-    6'b101100: lookup_cosine = `IDCT_COS_VAL8;
-    6'b101101: lookup_cosine = `IDCT_COS_VAL7;
-    6'b101110: lookup_cosine = `IDCT_COS_VAL1;
-    6'b101111: lookup_cosine = `IDCT_COS_VAL12;
+    6'b101100: lookup_cosine = `IDCT_COS_VAL9;
+    6'b101101: lookup_cosine = `IDCT_COS_VAL8;
+    6'b101110: lookup_cosine = `IDCT_COS_VAL2;
+    6'b101111: lookup_cosine = `IDCT_COS_VAL14;
     6'b110000: lookup_cosine = `IDCT_COS_VAL0;
-    6'b110001: lookup_cosine = `IDCT_COS_VAL12;
-    6'b110010: lookup_cosine = `IDCT_COS_VAL5;
-    6'b110011: lookup_cosine = `IDCT_COS_VAL6;
-    6'b110100: lookup_cosine = `IDCT_COS_VAL8;
+    6'b110001: lookup_cosine = `IDCT_COS_VAL14;
+    6'b110010: lookup_cosine = `IDCT_COS_VAL6;
+    6'b110011: lookup_cosine = `IDCT_COS_VAL7;
+    6'b110100: lookup_cosine = `IDCT_COS_VAL9;
     6'b110101: lookup_cosine = `IDCT_COS_VAL1;
-    6'b110110: lookup_cosine = `IDCT_COS_VAL9;
-    6'b110111: lookup_cosine = `IDCT_COS_VAL4;
+    6'b110110: lookup_cosine = `IDCT_COS_VAL11;
+    6'b110111: lookup_cosine = `IDCT_COS_VAL5;
     6'b111000: lookup_cosine = `IDCT_COS_VAL0;
-    6'b111001: lookup_cosine = `IDCT_COS_VAL9;
-    6'b111010: lookup_cosine = `IDCT_COS_VAL1;
-    6'b111011: lookup_cosine = `IDCT_COS_VAL12;
-    6'b111100: lookup_cosine = `IDCT_COS_VAL3;
-    6'b111101: lookup_cosine = `IDCT_COS_VAL10;
-    6'b111110: lookup_cosine = `IDCT_COS_VAL5;
-    6'b111111: lookup_cosine = `IDCT_COS_VAL7;
+    6'b111001: lookup_cosine = `IDCT_COS_VAL10;
+    6'b111010: lookup_cosine = `IDCT_COS_VAL2;
+    6'b111011: lookup_cosine = `IDCT_COS_VAL14;
+    6'b111100: lookup_cosine = `IDCT_COS_VAL4;
+    6'b111101: lookup_cosine = `IDCT_COS_VAL12;
+    6'b111110: lookup_cosine = `IDCT_COS_VAL6;
+    6'b111111: lookup_cosine = `IDCT_COS_VAL8;
     default  : lookup_cosine = {`Q_BIT{1'b0}};
     endcase
 end
@@ -184,8 +184,11 @@ end
 endfunction
 
 localparam IDCT_DELAY = 3;
+wire [`Q_INT_BIT-1:0] buf_int_w;
 
 integer i;
+reg[`Q_BIT-1:0] gd_veri_bfr;
+
 always @* begin
     for (i = 0; i < `BLOCK_AREA; i = i + 1) begin
         buf_blok_ns[i] =  buf_blok_r[i];
@@ -207,7 +210,11 @@ always @* begin
     dq_hazir_cmb = `LOW;
     gd_gecerli_cmb = `LOW;
 
-    gd_veri_cmb = buf_sonuc_r[ptr_gonder_r][`Q_FRAC_BIT +: `PIXEL_BIT];
+    gd_veri_bfr = buf_sonuc_r[ptr_gonder_r] + {128, {`Q_FRAC_BIT{1'b0}}};
+    // gd_veri_cmb = $signed(buf_int_w) > 127  ? 255 :
+    //               $signed(buf_int_w) < -128 ? 0   :
+    //               $signed(buf_int_w) + 128;  
+    gd_veri_cmb = buf_int_w;
     gd_row_cmb = get_row(ptr_gonder_r);
     gd_col_cmb = get_col(ptr_gonder_r);
     gd_blok_son_cmb = `LOW;
@@ -241,8 +248,9 @@ always @* begin
             buf_blok_ns[index(dq_row_i, dq_col_i)] = dq_veri_i;
             if (dq_blok_son_i) begin
                 durum_ns = DURUM_CARP;
+                //dq_hazir_cmb = 0;
             end
-        end
+        end 
     end
     DURUM_CARP: begin
         ptr_idct_istek_ns = ptr_idct_istek_r + 1;
@@ -306,11 +314,14 @@ idctii idct (
 );
 
 assign dq_hazir_o = dq_hazir_cmb;
-assign gd_veri_o = gd_veri_cmb < 127 ? gd_veri_cmb + 8'd128 : 8'd255;
+assign gd_veri_o = gd_veri_cmb;
 assign gd_row_o = gd_row_cmb;
 assign gd_col_o = gd_col_cmb;
 assign gd_gecerli_o = gd_gecerli_cmb;
 assign gd_blok_son_o = gd_blok_son_cmb;
+
+//assign buf_int_w = gd_veri_bfr[`Q_INT];
+assign buf_int_w = gd_veri_bfr[30] ? 8'd0 : ((gd_veri_bfr[30:16]>15'd255) ? 8'd255 : gd_veri_bfr[23:16] );
 
 assign carp_m_w = get_row(ptr_idct_sonuc_r);
 assign carp_n_w = get_col(ptr_idct_sonuc_r);

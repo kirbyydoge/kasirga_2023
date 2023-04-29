@@ -5,10 +5,10 @@ MN = 8
 ONLY_DISTINCT = True
 
 test_block = [0 for i in range(64)]
-test_block[0] = Fxp(160, True, 18, 3)
-test_block[1] = Fxp(11, True, 18, 3)
-test_block[9] = Fxp(-48, True, 18, 3)
-test_block[17] = Fxp(117, True, 18, 3)
+test_block[0] = Fxp(-6, True, 18, 3)
+test_block[10] = Fxp(-1, True, 18, 3)
+test_block[25] = Fxp(1, True, 18, 3)
+test_block[32] = Fxp(1, True, 18, 3)
 
 res_block = [0 for i in range(64)]
 

@@ -20,7 +20,7 @@ clc;
 %filename = 'football_Qvga.tif';
 %I = imread(filename);
 
- I = imread('image.png');
+ I = imread('splash.jpg');
  I = rgb2gray(I);
 
 % I = imread('image2.png');
