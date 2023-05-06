@@ -1,5 +1,6 @@
 # Kasırga Teknofest 2023
-```Takım Üyeleri
+```Takım Üyeleri```
+```
 Takım Danışmanı: Oğuz Ergin
 Takım Kaptanı: Oğuzhan Canpolat
 Takım Üyesi: Şevval İzmirli
